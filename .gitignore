@@ -44,3 +44,7 @@ apps/backend/prisma/migrations/
 
 # Misc
 *.log
+
+# Agents / Skills
+.agents/
+skills-lock.json
