@@ -2,7 +2,7 @@ import { prisma } from '@/config/prisma';
 import { UserRole } from '@prisma/client';
 import { ApiError } from '@/utils/api-error';
 import { hashPassword, verifyPassword } from '@/utils/password';
-import { buildAuthResponse } from '@/modules/auth/auth.helpers';
+import { buildAuthResponse } from '@/helpers/auth.helpers';
 import type {
   AuthResponse,
   RegisterServiceInput,
