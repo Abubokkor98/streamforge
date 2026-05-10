@@ -6,5 +6,5 @@ export function notFoundHandler(
   _res: Response,
   next: NextFunction,
 ): void {
-  next(ApiError.notFound(`Route not found: ${req.method} ${req.originalUrl}`));
+  next(ApiError.notFound(`Route not found: ${req.method} ${req.path}`));
 }

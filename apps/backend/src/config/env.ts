@@ -1,7 +1,5 @@
 import dotenv from 'dotenv';
 import path from 'path';
-import { StatusCodes } from 'http-status-codes';
-import { ApiError } from '@/utils/api-error';
 
 // Load .env from the backend root (apps/backend/.env)
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -17,14 +15,20 @@ function getRequiredEnv(key: string): string {
   const value = process.env[key];
 
   if (!value) {
-    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Missing required environment variable: ${key}`);
+    throw new Error(`Missing required environment variable: ${key}`);
   }
 
   return value;
 }
 
 export const env: EnvironmentConfig = {
-  PORT: parseInt(getRequiredEnv('PORT'), 10),
+  PORT: (() => {
+    const port = parseInt(getRequiredEnv('PORT'), 10);
+    if (isNaN(port) || port <= 0) {
+      throw new Error(`Invalid PORT value: ${process.env.PORT}`);
+    }
+    return port;
+  })(),
   DATABASE_URL: getRequiredEnv('DATABASE_URL'),
   JWT_SECRET: getRequiredEnv('JWT_SECRET'),
   JWT_EXPIRES_IN: getRequiredEnv('JWT_EXPIRES_IN'),

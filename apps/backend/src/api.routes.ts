@@ -3,6 +3,7 @@ import authRoutes from '@/modules/auth/auth.routes';
 
 const apiRouter = Router();
 
-apiRouter.use('/auth', authRoutes);
+const AUTH_BASE_PATH = '/auth';
+apiRouter.use(AUTH_BASE_PATH, authRoutes);
 
 export default apiRouter;

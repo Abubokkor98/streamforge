@@ -47,4 +47,8 @@ export class ApiError extends Error {
   static validation(errors: ValidationErrorDetail[]): ApiError {
     return new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, 'Validation failed', errors);
   }
+
+  static internal(message = 'Internal Server Error'): ApiError {
+    return new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, message, undefined, false);
+  }
 }

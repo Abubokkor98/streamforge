@@ -6,7 +6,7 @@ const SPECIAL_CHAR_REGEX = /[!@#$%^&*(),.?":{}|<>]/;
 
 export const registerSchema = z
   .object({
-    name: z.string().min(1, { error: 'Name is required' }).trim(),
+    name: z.string().trim().min(1, { error: 'Name is required' }),
     email: z.email({ error: 'Please provide a valid email address' }),
     password: z
       .string()

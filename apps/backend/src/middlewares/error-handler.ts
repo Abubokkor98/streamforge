@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ApiError } from '@/utils/api-error';
+import { logger } from '@/utils/logger';
 
 interface ErrorResponseBody {
   status: 'error';
@@ -15,6 +16,11 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ): void {
+  // If headers already sent, delegate to Express default handler
+  if (res.headersSent) {
+    return _next(err);
+  }
+
   if (err instanceof ApiError) {
     const body: ErrorResponseBody = {
       status: 'error',
@@ -31,7 +37,7 @@ export function errorHandler(
   }
 
   // Unexpected errors — log full stack for debugging
-  console.error('[Unhandled Error]', err.stack);
+  logger.error({ err }, '[Unhandled Error]');
 
   res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
     status: 'error',

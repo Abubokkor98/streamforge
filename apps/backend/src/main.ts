@@ -1,6 +1,7 @@
 import app from '@/server';
 import http from 'http';
 import { Server } from 'socket.io';
+import { logger } from '@/utils/logger';
 
 const PORT = process.env.PORT || 5000;
 
@@ -15,13 +16,13 @@ export const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
+  logger.info(`User connected: ${socket.id}`);
   
   socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id}`);
+    logger.info(`User disconnected: ${socket.id}`);
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
 });

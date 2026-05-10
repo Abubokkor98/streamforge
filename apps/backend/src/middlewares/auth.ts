@@ -1,6 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
+import { UserRole } from '@prisma/client';
 import { ApiError } from '@/utils/api-error';
 import { verifyToken } from '@/utils/jwt';
+import { logger } from '@/utils/logger';
+
+const tokenPayloadSchema = z.object({
+  userId: z.number(),
+  email: z.string(),
+  role: z.enum(['HOST', 'VIEWER']),
+});
 
 const BEARER_PREFIX = 'Bearer ';
 
@@ -16,15 +25,17 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
 
   try {
     const decoded = verifyToken(token);
+    const payload = tokenPayloadSchema.parse(decoded);
 
     req.user = {
-      userId: decoded.userId as number,
-      email: decoded.email as string,
-      role: decoded.role as string,
+      userId: payload.userId,
+      email: payload.email,
+      role: payload.role,
     };
 
     next();
-  } catch {
+  } catch (error) {
+    logger.error({ error }, '[Auth Middleware] Token verification failed');
     next(ApiError.unauthorized('Invalid or expired token'));
   }
 }

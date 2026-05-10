@@ -7,17 +7,23 @@ import { StatusCodes } from 'http-status-codes';
 
 const app = express();
 
+const SERVER_ROUTE_PATHS = {
+  health: '/health',
+  api: '/api',
+} as const;
+const STATUS_OK = 'OK';
+
 // Global middlewares
 app.use(cors());
 app.use(express.json());
 
 // Health check
-app.get('/health', (_req: Request, res: Response) => {
-  res.status(StatusCodes.OK).json({ status: 'OK', timestamp: new Date() });
+app.get(SERVER_ROUTE_PATHS.health, (_req: Request, res: Response) => {
+  res.status(StatusCodes.OK).json({ status: STATUS_OK, timestamp: new Date() });
 });
 
 // Central API router — all module routes register here
-app.use('/api', apiRouter);
+app.use(SERVER_ROUTE_PATHS.api, apiRouter);
 
 // Error handling (order matters: 404 first, then global handler)
 app.use(notFoundHandler);
