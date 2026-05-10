@@ -1,13 +1,16 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
+import { validate } from '@/middlewares/validate';
+import { registerSchema, loginSchema } from '@/modules/auth/auth.schema';
+import * as authController from '@/modules/auth/auth.controller';
 
 const router = Router();
 
-router.post('/register', (req: Request, res: Response) => {
-  res.json({ message: 'Register endpoint' });
-});
+const AUTH_ROUTE_PATHS = {
+  register: '/register',
+  login: '/login',
+} as const;
 
-router.post('/login', (req: Request, res: Response) => {
-  res.json({ message: 'Login endpoint' });
-});
+router.post(AUTH_ROUTE_PATHS.register, validate(registerSchema), authController.register);
+router.post(AUTH_ROUTE_PATHS.login, validate(loginSchema), authController.login);
 
 export default router;
