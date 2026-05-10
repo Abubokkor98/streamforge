@@ -31,3 +31,10 @@
 8. **Error Handling**: Handle all async errors with proper try/catch blocks. Never ignore errors silently.
 9. **File Order**: Maintain this file order inside components: Imports → Types → Hooks/State → Handlers → Derived variables → JSX.
 10. **Self-Documenting Code**: Write code assuming another developer will maintain it long-term. Add comments only when the reasoning is not obvious.
+11. **Semantic HTML & SEO**: Always use semantic HTML5 tags (e.g., `<main>`, `<section>`, `<article>`, `<aside>`, `<header>`, `<footer>`, `<nav>`) to structure the document. Avoid unnecessary `<div>` and `<span>` elements ("divitis") to ensure better accessibility, SEO, and cleaner DOM structure.
+
+## 4. Design, Composition & Performance
+1. **Distinctive Aesthetics**: Avoid generic "AI" designs. Use bold typography, cohesive color palettes, and thoughtful CSS micro-animations to create a premium, context-specific interface (frontend-design).
+2. **Component Composition**: Avoid boolean prop proliferation (e.g., `<Button isPrimary isLarge />`). Prefer explicit variants and compound components to keep APIs flexible and clean (vercel-composition-patterns).
+3. **Data Fetching Performance**: Eliminate async waterfalls by parallelizing fetches with `Promise.all()`. Optimize bundles by avoiding barrel file imports and use `React.cache()` for deduplication (vercel-react-best-practices).
+4. **Accessibility (a11y)**: Adhere strictly to Web Interface Guidelines. Ensure high color contrast, apply proper `aria-*` attributes, and guarantee full keyboard navigability for all interactive elements (web-design-guidelines).
