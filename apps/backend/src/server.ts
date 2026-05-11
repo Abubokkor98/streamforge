@@ -5,6 +5,7 @@ import { env } from '@/config/env';
 import apiRouter from '@/api.routes';
 import { notFoundHandler } from '@/middlewares/not-found';
 import { errorHandler } from '@/middlewares/error-handler';
+import { globalLimiter } from '@/middlewares/rate-limiter';
 import { StatusCodes } from 'http-status-codes';
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(globalLimiter);
 
 // Health check
 app.get(SERVER_ROUTE_PATHS.health, (_req: Request, res: Response) => {

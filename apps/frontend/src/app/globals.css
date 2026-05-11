@@ -53,7 +53,7 @@
   --color-warning: var(--warning);
 
   /* Font families */
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-manrope);
   --font-mono: var(--font-jetbrains-mono);
 }
 
