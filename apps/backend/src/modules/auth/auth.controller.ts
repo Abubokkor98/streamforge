@@ -60,6 +60,7 @@ export async function refresh(
     setRefreshTokenCookie(res, refreshToken);
     res.status(StatusCodes.OK).json({ status: 'success', data: responseData });
   } catch (error) {
+    clearRefreshTokenCookie(res);
     next(error);
   }
 }
@@ -79,6 +80,7 @@ export async function logout(
     clearRefreshTokenCookie(res);
     res.status(StatusCodes.OK).json({ status: 'success', data: { message: 'Logged out successfully' } });
   } catch (error) {
+    clearRefreshTokenCookie(res);
     next(error);
   }
 }

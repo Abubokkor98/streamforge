@@ -8,15 +8,24 @@ interface EmailOptions {
   html: string;
 }
 
+const SMTPS_PORT = 465;
+
 const transporter = nodemailer.createTransport({
   host: env.SMTP_HOST,
   port: env.SMTP_PORT,
-  secure: false,
+  secure: env.SMTP_PORT === SMTPS_PORT,
   auth: {
     user: env.SMTP_USER,
     pass: env.SMTP_PASS,
   },
 });
+
+function maskEmail(email: string): string {
+  const [localPart, domain] = email.split('@');
+  if (!localPart || !domain) return '***';
+  const visibleChars = Math.min(2, localPart.length);
+  return `${localPart.slice(0, visibleChars)}***@${domain}`;
+}
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
   try {
@@ -27,7 +36,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
       html: options.html,
     });
 
-    logger.info({ to: options.to, subject: options.subject }, '[Mailer] Email sent successfully');
+    logger.info({ to: maskEmail(options.to), subject: options.subject }, '[Mailer] Email sent successfully');
   } catch (error) {
     logger.error({ error, to: options.to }, '[Mailer] Failed to send email');
     throw error;

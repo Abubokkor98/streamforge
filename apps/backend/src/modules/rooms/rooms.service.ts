@@ -11,6 +11,13 @@ import type {
 
 const ROOM_KEY_LENGTH = 12;
 
+async function getOwnedRoomOrThrow(roomKey: string, hostId: number) {
+  const room = await prisma.room.findUnique({ where: { room_key: roomKey } });
+  if (!room) throw ApiError.notFound('Room not found');
+  if (room.host_id !== hostId) throw ApiError.forbidden('You do not own this room');
+  return room;
+}
+
 export async function createRoom(hostId: number, input: CreateRoomInput): Promise<RoomResponse> {
   const roomKey = nanoid(ROOM_KEY_LENGTH);
 
@@ -52,17 +59,7 @@ export async function updateRoom(
   hostId: number,
   input: UpdateRoomInput,
 ): Promise<RoomResponse> {
-  const room = await prisma.room.findUnique({
-    where: { room_key: roomKey },
-  });
-
-  if (!room) {
-    throw ApiError.notFound('Room not found');
-  }
-
-  if (room.host_id !== hostId) {
-    throw ApiError.forbidden('You do not own this room');
-  }
+  await getOwnedRoomOrThrow(roomKey, hostId);
 
   const updated = await prisma.room.update({
     where: { room_key: roomKey },
@@ -78,17 +75,7 @@ export async function updateRoom(
 }
 
 export async function deleteRoom(roomKey: string, hostId: number): Promise<void> {
-  const room = await prisma.room.findUnique({
-    where: { room_key: roomKey },
-  });
-
-  if (!room) {
-    throw ApiError.notFound('Room not found');
-  }
-
-  if (room.host_id !== hostId) {
-    throw ApiError.forbidden('You do not own this room');
-  }
+  const room = await getOwnedRoomOrThrow(roomKey, hostId);
 
   if (room.status === RoomStatus.LIVE) {
     throw ApiError.badRequest('Cannot delete a room that is currently live');

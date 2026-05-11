@@ -2,8 +2,8 @@ import { prisma } from '@/config/prisma';
 import { UserRole } from '@prisma/client';
 import { ApiError } from '@/utils/api-error';
 import { hashPassword, verifyPassword } from '@/utils/password';
-import { signToken } from '@/utils/jwt';
-import { generateOtp, OTP_EXPIRY_MINUTES, RESET_TOKEN_EXPIRY_MINUTES, REFRESH_TOKEN_EXPIRY_DAYS } from '@/utils/otp';
+import { signToken, verifyToken } from '@/utils/jwt';
+import { generateOtp, OTP_EXPIRY_MINUTES, RESET_TOKEN_EXPIRY_MINUTES, REFRESH_TOKEN_EXPIRY_DAYS, MS_PER_MINUTE, MS_PER_DAY, RESET_TOKEN_PURPOSE } from '@/utils/otp';
 import { generateRefreshToken, hashRefreshToken } from '@/utils/refresh-token';
 import { sendEmail } from '@/utils/mailer';
 import { passwordResetEmailHtml } from '@/templates/email.template';
@@ -22,27 +22,9 @@ import type {
 const MAX_SESSIONS = 5;
 
 async function createRefreshTokenForUser(userId: number): Promise<string> {
-  // Enforce session limit — remove oldest tokens if at capacity
-  const existingCount = await prisma.refreshToken.count({
-    where: { user_id: userId },
-  });
-
-  if (existingCount >= MAX_SESSIONS) {
-    const tokensToRemove = await prisma.refreshToken.findMany({
-      where: { user_id: userId },
-      orderBy: { created_at: 'asc' },
-      take: existingCount - MAX_SESSIONS + 1,
-      select: { id: true },
-    });
-
-    await prisma.refreshToken.deleteMany({
-      where: { id: { in: tokensToRemove.map(token => token.id) } },
-    });
-  }
-
   const refreshToken = generateRefreshToken();
   const tokenHash = hashRefreshToken(refreshToken);
-  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * MS_PER_DAY);
 
   await prisma.refreshToken.create({
     data: {
@@ -51,6 +33,24 @@ async function createRefreshTokenForUser(userId: number): Promise<string> {
       expires_at: expiresAt,
     },
   });
+
+  // Post-create prune to enforce MAX_SESSIONS and avoid TOCTOU races
+  const tokensToKeep = await prisma.refreshToken.findMany({
+    where: { user_id: userId },
+    orderBy: { created_at: 'desc' },
+    take: MAX_SESSIONS,
+    select: { id: true },
+  });
+
+  if (tokensToKeep.length === MAX_SESSIONS) {
+    const keepIds = tokensToKeep.map(t => t.id);
+    await prisma.refreshToken.deleteMany({
+      where: {
+        user_id: userId,
+        id: { notIn: keepIds },
+      },
+    });
+  }
 
   return refreshToken;
 }
@@ -158,7 +158,7 @@ export async function forgotPassword(input: ForgotPasswordServiceInput): Promise
 
   const otp = generateOtp();
   const otpHash = await hashPassword(otp);
-  const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+  const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * MS_PER_MINUTE);
 
   await prisma.passwordResetOtp.create({
     data: {
@@ -192,12 +192,12 @@ export async function verifyOtp(input: VerifyOtpServiceInput): Promise<ResetToke
   });
 
   if (!otpRecord) {
-    throw ApiError.badRequest('No reset code found. Please request a new one.');
+    throw ApiError.badRequest('Invalid or expired reset code');
   }
 
   if (new Date() > otpRecord.expires_at) {
     await prisma.passwordResetOtp.delete({ where: { id: otpRecord.id } });
-    throw ApiError.badRequest('Reset code has expired. Please request a new one.');
+    throw ApiError.badRequest('Invalid or expired reset code');
   }
 
   const isCodeValid = await verifyPassword(input.otp, otpRecord.otp_hash);
@@ -211,7 +211,7 @@ export async function verifyOtp(input: VerifyOtpServiceInput): Promise<ResetToke
   const resetTokenPayload = {
     userId: user.id,
     email: user.email,
-    purpose: 'password-reset',
+    purpose: RESET_TOKEN_PURPOSE,
   };
 
   return {
@@ -220,8 +220,6 @@ export async function verifyOtp(input: VerifyOtpServiceInput): Promise<ResetToke
 }
 
 export async function resetPassword(input: ResetPasswordServiceInput): Promise<MessageResponse> {
-  const { verifyToken } = await import('@/utils/jwt');
-
   let decoded: Record<string, unknown>;
 
   try {
@@ -230,11 +228,16 @@ export async function resetPassword(input: ResetPasswordServiceInput): Promise<M
     throw ApiError.badRequest('Invalid or expired reset token');
   }
 
-  if (decoded.purpose !== 'password-reset') {
+  if (decoded.purpose !== RESET_TOKEN_PURPOSE) {
     throw ApiError.badRequest('Invalid reset token');
   }
 
-  const userId = decoded.userId as number;
+  const userId = decoded.userId;
+
+  if (typeof userId !== 'number') {
+    throw ApiError.badRequest('Invalid reset token');
+  }
+
   const hashedPassword = await hashPassword(input.newPassword);
 
   await prisma.user.update({

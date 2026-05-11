@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import { env } from '@/config/env';
 import apiRouter from '@/api.routes';
 import { notFoundHandler } from '@/middlewares/not-found';
 import { errorHandler } from '@/middlewares/error-handler';
@@ -15,7 +16,10 @@ const SERVER_ROUTE_PATHS = {
 const STATUS_OK = 'OK';
 
 // Global middlewares
-app.use(cors());
+app.use(cors({
+  origin: env.FRONTEND_URL,
+  credentials: true,
+}));
 app.use(express.json());
 app.use(cookieParser());
 

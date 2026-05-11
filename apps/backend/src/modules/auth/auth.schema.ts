@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MAX_LENGTH = 128;
 const OTP_LENGTH = 6;
 const DIGIT_REGEX = /\d/;
 const SPECIAL_CHAR_REGEX = /[!@#$%^&*(),.?":{}|<>]/;
@@ -9,6 +10,9 @@ const passwordSchema = z
   .string()
   .min(PASSWORD_MIN_LENGTH, {
     error: `Password must be at least ${PASSWORD_MIN_LENGTH} characters`,
+  })
+  .max(PASSWORD_MAX_LENGTH, {
+    error: `Password must not exceed ${PASSWORD_MAX_LENGTH} characters`,
   })
   .regex(DIGIT_REGEX, { error: 'Password must contain at least one number' })
   .regex(SPECIAL_CHAR_REGEX, {

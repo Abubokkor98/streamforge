@@ -14,6 +14,7 @@ interface EnvironmentConfig {
   SMTP_USER: string;
   SMTP_PASS: string;
   SMTP_FROM: string;
+  FRONTEND_URL: string;
 }
 
 function getRequiredEnv(key: string): string {
@@ -48,4 +49,5 @@ export const env: EnvironmentConfig = {
   SMTP_USER: getRequiredEnv('SMTP_USER'),
   SMTP_PASS: getRequiredEnv('SMTP_PASS'),
   SMTP_FROM: getRequiredEnv('SMTP_FROM'),
+  FRONTEND_URL: getRequiredEnv('FRONTEND_URL'),
 };
