@@ -6,11 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum UserRole {
-  HOST
-  VIEWER
-}
-
 enum RoomStatus {
   OFFLINE
   LIVE
@@ -22,7 +17,6 @@ model User {
   name              String
   email             String    @unique
   password          String
-  role              UserRole  @default(HOST)
   avatar_url        String?
   is_active         Boolean   @default(true)
   email_verified_at DateTime?

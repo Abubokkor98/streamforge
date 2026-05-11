@@ -17,7 +17,7 @@
 - **Step 04** — Client-side validation runs on form submission — checks required fields, email format, password strength (min 8 chars, 1 number, 1 special character), and password match
 - **Step 05** — Frontend sends a `POST /api/auth/register` request to the backend API
 - **Step 06** — API checks if email already exists in PostgreSQL via Prisma — if duplicate, returns a `409 Conflict` error and shows inline field error to the user
-- **Step 07** — Password is hashed using `bcryptjs` and a new User record is created in the database with role `HOST`
+- **Step 07** — Password is hashed using `bcryptjs` and a new User record is created in the database
 - **Step 08** — A JWT access token (15-minute TTL) is generated and returned in the response body. A refresh token (7-day TTL) is set as an HttpOnly, Secure, SameSite cookie
 - **Step 09** — Access token is stored in memory on the frontend. Refresh token is managed automatically by the browser via the HttpOnly cookie
 - **Step 10** — User is redirected to `/dashboard` — the Host Dashboard
@@ -79,7 +79,7 @@
 - **Step 03** — Host fills in: Stream Title (required), Description (optional), Thumbnail image (optional)
 - **Step 04** — Frontend validates that title is not empty and thumbnail is under 2MB if provided
 - **Step 05** — Frontend sends `POST /api/rooms` with form data — request includes JWT token for auth
-- **Step 06** — API middleware validates the JWT and confirms the user has the `HOST` role
+- **Step 06** — API middleware validates the JWT and confirms the user is authenticated
 - **Step 07** — A unique `roomKey` (slug) is generated using nanoid or UUID
 - **Step 08** — Room record is created in PostgreSQL via Prisma with status `OFFLINE`, linked to the host's user ID
 - **Step 09** — API returns the room data including the `roomKey`
@@ -264,7 +264,7 @@
 ---
 
 - **Step 01** — Host logs in and lands on `/dashboard`
-- **Step 02** — Frontend sends `GET /api/rooms/host/mine` with the JWT token
+- **Step 02** — Frontend sends `GET /api/rooms/mine` with the JWT token
 - **Step 03** — API returns a list of all rooms belonging to the logged-in host
 - **Step 04** — Rooms are displayed as cards showing: Title, Status badge (Offline / Live / Ended), Created date, and quick action buttons
 - **Step 05** — Host clicks **"Go Live"** on an Offline room card — navigates to `/host/<roomKey>`
