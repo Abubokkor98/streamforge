@@ -1,16 +1,12 @@
-import { UserRole } from '@prisma/client';
-
 export interface TokenPayload {
   userId: number;
   email: string;
-  role: UserRole;
 }
 
 export interface UserProfile {
   id: number;
   name: string;
   email: string;
-  role: UserRole;
 }
 
 export interface AuthResponse {

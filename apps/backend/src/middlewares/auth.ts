@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { UserRole } from '@prisma/client';
 import { ApiError } from '@/utils/api-error';
 import { verifyToken } from '@/utils/jwt';
 import { logger } from '@/utils/logger';
@@ -8,7 +7,6 @@ import { logger } from '@/utils/logger';
 const tokenPayloadSchema = z.object({
   userId: z.number(),
   email: z.string(),
-  role: z.enum(['HOST', 'VIEWER']),
 });
 
 const BEARER_PREFIX = 'Bearer ';
@@ -30,7 +28,6 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
     req.user = {
       userId: payload.userId,
       email: payload.email,
-      role: payload.role,
     };
 
     next();

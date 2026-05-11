@@ -1,5 +1,4 @@
 import { prisma } from '@/config/prisma';
-import { UserRole } from '@prisma/client';
 import { ApiError } from '@/utils/api-error';
 import { hashPassword, verifyPassword } from '@/utils/password';
 import { signToken, verifyToken } from '@/utils/jwt';
@@ -71,7 +70,6 @@ export async function register(input: RegisterServiceInput): Promise<AuthRespons
       name: input.name,
       email: input.email,
       password: hashedPassword,
-      role: UserRole.HOST,
     },
   });
 

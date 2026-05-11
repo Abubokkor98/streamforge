@@ -6,13 +6,12 @@
 
 ## Authentication & Account Access
 
-1. Host registration with name, email, and password
-2. Host login with JWT-based authentication
+1. User registration with name, email, and password — all registered users can both watch and broadcast
+2. User login with JWT-based authentication
 3. Forgot password with OTP verification and password reset
-4. Guest viewer access — join stream without registration using a display name
-5. Registered viewer login for full chat and reaction access
-6. Logout and session expiry handling (access token: 15 minutes, refresh token: 7 days via HttpOnly cookie with automatic rotation)
-7. Protected routes — dashboard and broadcast page require authentication
+4. Guest viewer access — join stream without registration using a display name (limited chat, no dashboard)
+5. Logout and session expiry handling (access token: 15 minutes, refresh token: 7 days via HttpOnly cookie with automatic rotation)
+6. Protected routes — dashboard and broadcast page require authentication
 
 ---
 

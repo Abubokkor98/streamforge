@@ -24,7 +24,6 @@ erDiagram
         String name
         String email UK
         String password
-        UserRole role
     }
     refresh_tokens {
         Int id PK
@@ -58,13 +57,6 @@ erDiagram
 
 ## Enums
 
-### `UserRole`
-
-| Value    | Description                          |
-| -------- | ------------------------------------ |
-| `HOST`   | Can create rooms and broadcast       |
-| `VIEWER` | Registered viewer with full chat access |
-
 ### `RoomStatus`
 
 | Value     | Description                            |
@@ -86,7 +78,6 @@ erDiagram
 | `name`              | string    | no   |         |                                |
 | `email`             | string    | no   |         | UK (unique, global)            |
 | `password`          | string    | no   |         | bcryptjs hash                  |
-| `role`              | enum      | no   | `HOST`  | `HOST`, `VIEWER`               |
 | `avatar_url`        | string    | yes  |         | Shown when camera off          |
 | `is_active`         | boolean   | no   | `true`  |                                |
 | `email_verified_at` | timestamp | yes  |         |                                |
