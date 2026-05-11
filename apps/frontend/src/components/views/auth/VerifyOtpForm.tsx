@@ -20,6 +20,7 @@ function VerifyOtpForm({ action, error }: VerifyOtpFormProps) {
         placeholder="Enter 6-digit code"
         autoComplete="one-time-code"
         inputMode="numeric"
+        pattern="[0-9]{6}"
         maxLength={6}
         required
       />

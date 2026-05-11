@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { apiClient } from "@/lib/api-client"
 import { toast } from "sonner"
 import { validatePassword, validatePasswordMatch } from "@/lib/validation"
+import { safeSessionStorage } from "@/lib/safe-storage"
 
 interface ResetPasswordState {
   error: string | null
@@ -16,6 +17,7 @@ interface ResetPasswordState {
 
 const INITIAL_STATE: ResetPasswordState = { error: null, fieldErrors: {} }
 const LOGIN_ROUTE = "/login"
+const STORAGE_KEY_TOKEN = "reset-token"
 
 export function useResetPasswordAction() {
   const router = useRouter()
@@ -24,9 +26,19 @@ export function useResetPasswordAction() {
     _prevState: ResetPasswordState,
     formData: FormData,
   ): Promise<ResetPasswordState> {
-    const newPassword = formData.get("newPassword") as string
-    const confirmPassword = formData.get("confirmPassword") as string
-    const resetToken = sessionStorage.getItem("reset-token")
+    const rawPassword = formData.get("newPassword")
+    const rawConfirm = formData.get("confirmPassword")
+
+    if (typeof rawPassword !== "string" || typeof rawConfirm !== "string") {
+      return {
+        error: null,
+        fieldErrors: { newPassword: "Password is required." },
+      }
+    }
+
+    const newPassword = rawPassword
+    const confirmPassword = rawConfirm
+    const resetToken = safeSessionStorage.getItem(STORAGE_KEY_TOKEN)
 
     if (!resetToken) {
       return {
@@ -57,7 +69,7 @@ export function useResetPasswordAction() {
         body: { resetToken, newPassword },
       })
 
-      sessionStorage.removeItem("reset-token")
+      safeSessionStorage.removeItem(STORAGE_KEY_TOKEN)
       toast.success("Password reset successfully. Please sign in.")
       router.push(LOGIN_ROUTE)
 

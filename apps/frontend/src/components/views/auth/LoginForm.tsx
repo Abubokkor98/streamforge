@@ -23,25 +23,21 @@ function LoginForm({ action, error }: LoginFormProps) {
         required
       />
 
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <FormField
-            id="login-password"
-            name="password"
-            type="password"
-            label="Password"
-            placeholder="••••••••"
-            autoComplete="current-password"
-            required
-          />
-        </div>
-        <Link
-          href="/forgot-password"
-          className="self-end text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
-        >
-          Forgot password?
-        </Link>
-      </div>
+      <FormField
+        id="login-password"
+        name="password"
+        type="password"
+        label="Password"
+        placeholder="••••••••"
+        autoComplete="current-password"
+        required
+      />
+      <Link
+        href="/forgot-password"
+        className="-mt-4 self-end text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+      >
+        Forgot password?
+      </Link>
 
       <SubmitButton size="lg" pendingText="Signing in…">
         Sign In

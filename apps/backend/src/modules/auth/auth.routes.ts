@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { validate } from '@/middlewares/validate';
 import { authenticate } from '@/middlewares/auth';
-import { authLimiter } from '@/middlewares/rate-limiter';
+import { authLimiter, refreshLimiter } from '@/middlewares/rate-limiter';
 import {
   registerSchema,
   loginSchema,
@@ -26,7 +26,7 @@ const AUTH_ROUTE_PATHS = {
 
 router.post(AUTH_ROUTE_PATHS.register, authLimiter, validate(registerSchema), authController.register);
 router.post(AUTH_ROUTE_PATHS.login, authLimiter, validate(loginSchema), authController.login);
-router.post(AUTH_ROUTE_PATHS.refresh, authController.refresh);
+router.post(AUTH_ROUTE_PATHS.refresh, refreshLimiter, authController.refresh);
 router.post(AUTH_ROUTE_PATHS.logout, authController.logout);
 router.post(AUTH_ROUTE_PATHS.logoutAll, authenticate, authController.logoutAllDevices);
 router.post(AUTH_ROUTE_PATHS.forgotPassword, authLimiter, validate(forgotPasswordSchema), authController.forgotPassword);

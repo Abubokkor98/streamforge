@@ -106,10 +106,11 @@ export async function apiClient<T>(
     if (refreshed) {
       response = await makeRequest()
     } else {
+      clearAccessToken()
       if (typeof window !== "undefined") {
         window.location.href = "/login"
       }
-      throw new Error("Session expired. Please login again.")
+      return Promise.reject(new Error("Session expired. Please login again.")) as Promise<T>
     }
   }
 

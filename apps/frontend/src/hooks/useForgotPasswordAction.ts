@@ -3,6 +3,7 @@
 import { useActionState } from "react"
 import { useRouter } from "next/navigation"
 import { apiClient } from "@/lib/api-client"
+import { safeSessionStorage } from "@/lib/safe-storage"
 
 interface ForgotPasswordState {
   error: string | null
@@ -11,6 +12,7 @@ interface ForgotPasswordState {
 
 const INITIAL_STATE: ForgotPasswordState = { error: null, success: false }
 const VERIFY_OTP_ROUTE = "/verify-otp"
+const STORAGE_KEY_EMAIL = "reset-email"
 
 export function useForgotPasswordAction() {
   const router = useRouter()
@@ -19,9 +21,9 @@ export function useForgotPasswordAction() {
     _prevState: ForgotPasswordState,
     formData: FormData,
   ): Promise<ForgotPasswordState> {
-    const email = formData.get("email") as string
+    const email = formData.get("email")
 
-    if (!email?.trim()) {
+    if (typeof email !== "string" || !email.trim()) {
       return { error: "Email is required.", success: false }
     }
 
@@ -31,8 +33,7 @@ export function useForgotPasswordAction() {
         body: { email },
       })
 
-      // Store email for the OTP step
-      sessionStorage.setItem("reset-email", email)
+      safeSessionStorage.setItem(STORAGE_KEY_EMAIL, email)
       router.push(VERIFY_OTP_ROUTE)
 
       return { error: null, success: true }
