@@ -10,6 +10,7 @@
 erDiagram
     users ||--o{ rooms : "hosts"
     users ||--o{ password_reset_otps : "requests"
+    users ||--o{ refresh_tokens : "has"
     users ||--o{ chat_messages : "sends"
     rooms ||--o{ stream_sessions : "has"
     rooms ||--o{ chat_messages : "contains"
@@ -24,6 +25,12 @@ erDiagram
         String email UK
         String password
         UserRole role
+    }
+    refresh_tokens {
+        Int id PK
+        Int user_id FK
+        String token_hash UK
+        DateTime expires_at
     }
     rooms {
         Int id PK
@@ -102,12 +109,32 @@ erDiagram
 | `user_id`    | int       | no   |         | FK → `users.id`, ON DELETE CASCADE   |
 | `otp_hash`   | string    | no   |         | Hashed 6-digit OTP                   |
 | `expires_at` | timestamp | no   |         | 10-minute window from creation       |
-| `is_used`    | boolean   | no   | `false` | Marked `true` after successful verify|
 | `created_at` | timestamp | no   | `now()` |                                      |
+
+> **Note:** OTPs are hard-deleted after successful verification rather than soft-flagged. This eliminates stale data and simplifies queries.
 
 **Indexes:**
 - `IDX_password_reset_otps_user_id` — index on `user_id`
 - `IDX_password_reset_otps_expires_at` — index on `expires_at` (for cleanup queries)
+
+---
+
+## 2.5 refresh_tokens
+
+> Source: Authentication — Token rotation, session management, logout from all devices
+> Rationale: Refresh tokens are SHA256-hashed before storage. Token rotation deletes the old token and creates a new one on each refresh. A maximum of 5 active tokens per user prevents database accumulation.
+
+| Column       | Type      | Null | Default | Notes                                       |
+| ------------ | --------- | ---- | ------- | ------------------------------------------- |
+| `id`         | int       | no   | AI      | PK                                          |
+| `user_id`    | int       | no   |         | FK → `users.id`, ON DELETE CASCADE          |
+| `token_hash` | string    | no   |         | UK (unique), SHA256 hash of raw token       |
+| `expires_at` | timestamp | no   |         | 7-day window from creation                  |
+| `created_at` | timestamp | no   | `now()` |                                             |
+
+**Indexes:**
+- `UK_refresh_tokens_token_hash` — unique index on `token_hash` (lookup on refresh)
+- `IDX_refresh_tokens_user_id` — index on `user_id` (logout-all, session count)
 
 ---
 
@@ -132,7 +159,7 @@ erDiagram
 
 **Indexes:**
 - `UK_rooms_room_key` — unique index on `room_key`
-- `IDX_rooms_host_id` — index on `host_id` (dashboard queries: `GET /api/rooms/host/mine`)
+- `IDX_rooms_host_id` — index on `host_id` (dashboard queries: `GET /api/rooms/mine`)
 - `IDX_rooms_status` — index on `status` (filter by live/offline/ended)
 
 ---
@@ -247,6 +274,7 @@ These features are handled in-memory or via transient real-time events and do **
 | FK Column                           | Type | References         | Type | Match |
 | ----------------------------------- | ---- | ------------------ | ---- | ----- |
 | `password_reset_otps.user_id`       | int  | `users.id`         | int  | ✅    |
+| `refresh_tokens.user_id`            | int  | `users.id`         | int  | ✅    |
 | `rooms.host_id`                     | int  | `users.id`         | int  | ✅    |
 | `stream_sessions.room_id`           | int  | `rooms.id`         | int  | ✅    |
 | `chat_messages.room_id`             | int  | `rooms.id`         | int  | ✅    |
@@ -266,6 +294,8 @@ These features are handled in-memory or via transient real-time events and do **
 | -------------------------------------------- | --------------------------------- | ------- |
 | Host registration (name, email, password)    | `users`                           | MVP     |
 | JWT authentication & login                   | `users` (query by email)          | MVP     |
+| Refresh token session management             | `refresh_tokens`                  | MVP     |
+| Logout / logout from all devices             | `refresh_tokens` (delete by user) | MVP     |
 | Forgot password with OTP                     | `password_reset_otps`             | MVP     |
 | Create stream room (title, desc, thumbnail)  | `rooms`                           | MVP     |
 | Unique shareable URL per room                | `rooms.room_key`                  | MVP     |
@@ -288,6 +318,7 @@ These features are handled in-memory or via transient real-time events and do **
 | Parent Deleted       | Child Table              | Action         | Reason                                          |
 | -------------------- | ------------------------ | -------------- | ----------------------------------------------- |
 | `users` deleted      | `password_reset_otps`    | CASCADE        | OTPs are useless without the user               |
+| `users` deleted      | `refresh_tokens`         | CASCADE        | Sessions are useless without the user            |
 | `users` deleted      | `rooms`                  | CASCADE        | Host's rooms removed with account               |
 | `users` deleted      | `chat_messages.sender_id`| SET NULL       | Preserve chat history, show as "[deleted user]"  |
 | `rooms` deleted      | `stream_sessions`        | CASCADE        | Session data belongs to the room                 |

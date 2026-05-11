@@ -15,11 +15,11 @@
 - **Step 02** — User is navigated to the `/register` page
 - **Step 03** — User fills in the registration form: Full Name, Email Address, Password, Confirm Password
 - **Step 04** — Client-side validation runs on form submission — checks required fields, email format, password strength (min 8 chars, 1 number, 1 special character), and password match
-- **Step 05** — Frontend sends a `POST /api/auth/register` request to the Next.js API route
+- **Step 05** — Frontend sends a `POST /api/auth/register` request to the backend API
 - **Step 06** — API checks if email already exists in PostgreSQL via Prisma — if duplicate, returns a `409 Conflict` error and shows inline field error to the user
 - **Step 07** — Password is hashed using `bcryptjs` and a new User record is created in the database with role `HOST`
-- **Step 08** — A JWT token is generated and returned in the response
-- **Step 09** — Token is stored in `localStorage` (or `httpOnly` cookie)
+- **Step 08** — A JWT access token (15-minute TTL) is generated and returned in the response body. A refresh token (7-day TTL) is set as an HttpOnly, Secure, SameSite cookie
+- **Step 09** — Access token is stored in memory on the frontend. Refresh token is managed automatically by the browser via the HttpOnly cookie
 - **Step 10** — User is redirected to `/dashboard` — the Host Dashboard
 
 ---
@@ -37,9 +37,9 @@
 - **Step 04** — API queries the database for the user by email using Prisma
 - **Step 05** — If user not found, returns generic `401` error: *"Invalid email or password"* (no specific field hint for security)
 - **Step 06** — If user found, `bcryptjs.compare()` validates the password hash
-- **Step 07** — On match, a signed JWT token is generated with user ID and role
-- **Step 08** — Token returned to frontend and stored; user redirected to `/dashboard`
-- **Step 09** — On subsequent requests, JWT is sent in `Authorization: Bearer <token>` header and validated by middleware
+- **Step 07** — On match, a JWT access token (15-minute TTL) is generated and returned in the response body. A refresh token (7-day TTL) is set as an HttpOnly cookie
+- **Step 08** — Access token stored in memory; user redirected to `/dashboard`. Refresh token is automatically managed by the browser cookie
+- **Step 09** — On subsequent requests, the access token is sent in `Authorization: Bearer <token>` header and validated by middleware. When it expires, the refresh token cookie is used to silently obtain a new access token
 
 ---
 
@@ -62,7 +62,8 @@
 - **Step 10** — On success, user is navigated to `/reset-password` page
 - **Step 11** — User enters new password and confirms it — frontend validates match and strength
 - **Step 12** — Frontend sends `POST /api/auth/reset-password` — API updates the hashed password in DB
-- **Step 13** — User is redirected to `/login` with a success toast notification
+- **Step 13** — All existing refresh tokens for the user are invalidated, forcing re-login on all devices
+- **Step 14** — User is redirected to `/login` with a success toast notification
 
 ---
 

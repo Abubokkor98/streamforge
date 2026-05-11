@@ -11,7 +11,7 @@
 3. Forgot password with OTP verification and password reset
 4. Guest viewer access — join stream without registration using a display name
 5. Registered viewer login for full chat and reaction access
-6. Logout and session expiry handling (token expires after 24 hours)
+6. Logout and session expiry handling (access token: 15 minutes, refresh token: 7 days via HttpOnly cookie with automatic rotation)
 7. Protected routes — dashboard and broadcast page require authentication
 
 ---
@@ -109,7 +109,7 @@
 
 1. All WebRTC media streams are end-to-end encrypted via LiveKit
 2. HTTPS enforced in all production environments
-3. JWT tokens expire after 24 hours and are validated on every protected request
+3. Access tokens expire after 15 minutes; refresh tokens (HttpOnly cookie) expire after 7 days with automatic rotation on each refresh
 4. TURN server credentials rotated per session for additional security
 5. Rate limiting on REST API endpoints to prevent abuse
 6. End-to-end stream latency target is under 500ms under normal conditions
