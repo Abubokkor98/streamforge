@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import apiRouter from '@/api.routes';
 import { notFoundHandler } from '@/middlewares/not-found';
 import { errorHandler } from '@/middlewares/error-handler';
@@ -16,6 +17,7 @@ const STATUS_OK = 'OK';
 // Global middlewares
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 // Health check
 app.get(SERVER_ROUTE_PATHS.health, (_req: Request, res: Response) => {

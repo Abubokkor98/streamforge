@@ -9,6 +9,11 @@ interface EnvironmentConfig {
   DATABASE_URL: string;
   JWT_SECRET: string;
   JWT_EXPIRES_IN: string;
+  SMTP_HOST: string;
+  SMTP_PORT: number;
+  SMTP_USER: string;
+  SMTP_PASS: string;
+  SMTP_FROM: string;
 }
 
 function getRequiredEnv(key: string): string {
@@ -32,4 +37,15 @@ export const env: EnvironmentConfig = {
   DATABASE_URL: getRequiredEnv('DATABASE_URL'),
   JWT_SECRET: getRequiredEnv('JWT_SECRET'),
   JWT_EXPIRES_IN: getRequiredEnv('JWT_EXPIRES_IN'),
+  SMTP_HOST: getRequiredEnv('SMTP_HOST'),
+  SMTP_PORT: (() => {
+    const port = parseInt(getRequiredEnv('SMTP_PORT'), 10);
+    if (isNaN(port) || port <= 0) {
+      throw new Error(`Invalid SMTP_PORT value: ${process.env.SMTP_PORT}`);
+    }
+    return port;
+  })(),
+  SMTP_USER: getRequiredEnv('SMTP_USER'),
+  SMTP_PASS: getRequiredEnv('SMTP_PASS'),
+  SMTP_FROM: getRequiredEnv('SMTP_FROM'),
 };

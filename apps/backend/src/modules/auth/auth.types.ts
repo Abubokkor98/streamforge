@@ -6,14 +6,25 @@ export interface TokenPayload {
   role: UserRole;
 }
 
+export interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+}
+
 export interface AuthResponse {
-  user: {
-    id: number;
-    name: string;
-    email: string;
-    role: UserRole;
-  };
-  token: string;
+  user: UserProfile;
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface MessageResponse {
+  message: string;
+}
+
+export interface ResetTokenResponse {
+  resetToken: string;
 }
 
 export interface RegisterServiceInput {
@@ -25,4 +36,18 @@ export interface RegisterServiceInput {
 export interface LoginServiceInput {
   email: string;
   password: string;
+}
+
+export interface ForgotPasswordServiceInput {
+  email: string;
+}
+
+export interface VerifyOtpServiceInput {
+  email: string;
+  otp: string;
+}
+
+export interface ResetPasswordServiceInput {
+  resetToken: string;
+  newPassword: string;
 }
