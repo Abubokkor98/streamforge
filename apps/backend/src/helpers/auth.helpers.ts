@@ -4,6 +4,7 @@ import { UserRole } from '@prisma/client';
 
 export function buildAuthResponse(
   user: { id: number; name: string; email: string; role: UserRole },
+  refreshToken: string,
 ): AuthResponse {
   const tokenPayload: TokenPayload = {
     userId: user.id,
@@ -13,6 +14,7 @@ export function buildAuthResponse(
 
   return {
     user: { id: user.id, name: user.name, email: user.email, role: user.role },
-    token: signToken(tokenPayload),
+    accessToken: signToken(tokenPayload),
+    refreshToken,
   };
 }
