@@ -1,126 +1,123 @@
-import {
-  getAccessToken,
-  setAccessToken,
-  clearAccessToken,
-} from "@/lib/auth-store"
+import axios, { type InternalAxiosRequestConfig } from "axios"
+import { useAuthStore } from "@/lib/auth-store"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"
-const REFRESH_ENDPOINT = "/api/auth/refresh"
-
-interface ApiErrorResponse {
-  message: string
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean
 }
 
-interface ApiRequestOptions extends Omit<RequestInit, "body"> {
-  body?: unknown
-}
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"
 
-/**
- * Mutex for token refresh — prevents the double-refresh race condition.
- *
- * When multiple requests get a 401 simultaneously, only ONE refresh
- * fires. All others wait for it to complete, then retry with the
- * new access token.
- */
-let isRefreshing = false
-let refreshPromise: Promise<boolean> | null = null
+export const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+})
 
-async function refreshAccessToken(): Promise<boolean> {
-  try {
-    const response = await fetch(`${API_BASE_URL}${REFRESH_ENDPOINT}`, {
-      method: "POST",
-      credentials: "include",
-    })
-
-    if (!response.ok) {
-      clearAccessToken()
-      return false
-    }
-
-    const data = (await response.json()) as { accessToken: string }
-    setAccessToken(data.accessToken)
-    return true
-  } catch {
-    clearAccessToken()
-    return false
-  }
-}
-
-async function handleTokenRefresh(): Promise<boolean> {
-  if (isRefreshing && refreshPromise) {
-    return refreshPromise
-  }
-
-  isRefreshing = true
-  refreshPromise = refreshAccessToken().finally(() => {
-    isRefreshing = false
-    refreshPromise = null
-  })
-
-  return refreshPromise
-}
-
-/**
- * Core API client with automatic token refresh.
- *
- * - Attaches access token to Authorization header
- * - Sends credentials (refresh token cookie) with every request
- * - On 401: refreshes token once, then retries the original request
- * - On refresh failure: clears token and redirects to /login
- */
-export async function apiClient<T>(
-  endpoint: string,
-  options: ApiRequestOptions = {},
-): Promise<T> {
-  const { body, headers: customHeaders, ...restOptions } = options
-
-  const buildHeaders = (): HeadersInit => {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...((customHeaders as Record<string, string>) ?? {}),
-    }
-
-    const token = getAccessToken()
+// ── Request interceptor: attach access token ──
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = useAuthStore.getState().accessToken
     if (token) {
-      headers["Authorization"] = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`
     }
+    return config
+  },
+  (error) => Promise.reject(error),
+)
 
-    return headers
-  }
+// ── Endpoints that return 401 intentionally (bad credentials, not expired token) ──
+const SKIP_REFRESH_PATHS = [
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/logout",
+  "/api/auth/reset-password",
+]
 
-  const makeRequest = async (): Promise<Response> => {
-    return fetch(`${API_BASE_URL}${endpoint}`, {
-      ...restOptions,
-      headers: buildHeaders(),
-      credentials: "include",
-      body: body ? JSON.stringify(body) : undefined,
-    })
-  }
+const shouldSkipRefresh = (url: string | undefined): boolean =>
+  SKIP_REFRESH_PATHS.some((path) => url?.includes(path))
 
-  let response = await makeRequest()
+// ── Shared refresh promise — prevents concurrent refreshes ──
+let refreshTokenPromise: Promise<string> | null = null
 
-  // If 401 and we have a token, attempt a single refresh + retry
-  if (response.status === 401 && getAccessToken()) {
-    const refreshed = await handleTokenRefresh()
-
-    if (refreshed) {
-      response = await makeRequest()
-    } else {
-      clearAccessToken()
-      if (typeof window !== "undefined") {
-        window.location.href = "/login"
-      }
-      return Promise.reject(new Error("Session expired. Please login again.")) as Promise<T>
-    }
-  }
-
-  if (!response.ok) {
-    const errorData = (await response.json().catch(() => ({
-      message: "An unexpected error occurred",
-    }))) as ApiErrorResponse
-
-    throw new Error(errorData.message)
-  }
-
-  return response.json() as Promise<T>
+const resetRefreshState = (): void => {
+  refreshTokenPromise = null
 }
+
+// ── Response interceptor: handle 401 + auto-refresh ──
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config as CustomAxiosRequestConfig
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !shouldSkipRefresh(originalRequest.url)
+    ) {
+      originalRequest._retry = true
+
+      // If already refreshing, wait for that promise
+      if (refreshTokenPromise) {
+        try {
+          const newToken = await refreshTokenPromise
+          originalRequest.headers.Authorization = `Bearer ${newToken}`
+          return axiosInstance(originalRequest)
+        } catch (refreshError) {
+          return Promise.reject(refreshError)
+        }
+      }
+
+      // Start new refresh attempt
+      refreshTokenPromise = (async () => {
+        try {
+          const response = await axios.post(
+            `${API_BASE_URL}/api/auth/refresh`,
+            {},
+            { withCredentials: true },
+          )
+
+          const { accessToken } = response.data.data
+          if (!accessToken) {
+            throw new Error("Token refresh returned no access token")
+          }
+
+          useAuthStore.getState().setToken(accessToken)
+          return accessToken
+        } catch (refreshError: unknown) {
+          const axiosError = refreshError as {
+            response?: { status?: number }
+          }
+
+          const isAuthError =
+            axiosError.response?.status === 401 ||
+            axiosError.response?.status === 403
+
+          if (isAuthError) {
+            useAuthStore.getState().logout()
+
+            if (typeof window !== "undefined") {
+              window.location.href = "/login"
+            }
+          }
+
+          throw refreshError
+        } finally {
+          resetRefreshState()
+        }
+      })()
+
+      try {
+        const newToken = await refreshTokenPromise
+        originalRequest.headers.Authorization = `Bearer ${newToken}`
+        return axiosInstance(originalRequest)
+      } catch (refreshError) {
+        return Promise.reject(refreshError)
+      }
+    }
+
+    return Promise.reject(error)
+  },
+)

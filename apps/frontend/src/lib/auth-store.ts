@@ -1,21 +1,43 @@
-/**
- * In-memory access token storage.
- *
- * Access tokens are NEVER stored in localStorage or cookies — they live
- * only in module-level memory. This prevents XSS-based token theft.
- * The refresh token (HttpOnly cookie) handles persistence across reloads.
- */
+import { create } from "zustand"
+import { persist } from "zustand/middleware"
 
-let accessToken: string | null = null
-
-export function getAccessToken(): string | null {
-  return accessToken
+export interface User {
+  id: number
+  name: string
+  email: string
 }
 
-export function setAccessToken(token: string): void {
-  accessToken = token
+interface AuthState {
+  user: User | null
+  accessToken: string | null
+  hasHydrated: boolean
+  setUser: (user: User | null) => void
+  setToken: (token: string | null) => void
+  logout: () => void
 }
 
-export function clearAccessToken(): void {
-  accessToken = null
-}
+export const selectIsAuthenticated = (state: AuthState): boolean => !!state.user
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      accessToken: null,
+      hasHydrated: false,
+      setUser: (user) => set({ user }),
+      setToken: (token) => set({ accessToken: token }),
+      logout: () => set({ user: null, accessToken: null }),
+    }),
+    {
+      name: "sf-auth-storage",
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.hasHydrated = true
+        }
+      },
+    },
+  ),
+)
+
+export const useIsAuthenticated = (): boolean =>
+  useAuthStore(selectIsAuthenticated)

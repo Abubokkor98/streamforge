@@ -2,9 +2,10 @@
 
 import { useActionState } from "react"
 import { useRouter } from "next/navigation"
-import { apiClient } from "@/lib/api-client"
-import { setAccessToken } from "@/lib/auth-store"
+import { axiosInstance } from "@/lib/api-client"
+import { useAuthStore } from "@/lib/auth-store"
 import { validatePassword, validatePasswordMatch } from "@/lib/validation"
+import { toast } from "sonner"
 
 interface RegisterState {
   error: string | null
@@ -54,6 +55,7 @@ function validateRegistration(formData: FormData): RegisterState | null {
 
 export function useRegisterAction() {
   const router = useRouter()
+  const { setUser, setToken } = useAuthStore()
 
   async function registerAction(
     _prevState: RegisterState,
@@ -67,14 +69,17 @@ export function useRegisterAction() {
     const name = formData.get("name") as string
     const email = formData.get("email") as string
     const password = formData.get("password") as string
+    const confirmPassword = formData.get("confirmPassword") as string
 
     try {
-      const data = await apiClient<RegisterResponse>("/api/auth/register", {
-        method: "POST",
-        body: { name, email, password },
-      })
+      const response = await axiosInstance.post<{
+        status: string
+        data: RegisterResponse
+      }>("/api/auth/register", { name, email, password, confirmPassword })
 
-      setAccessToken(data.accessToken)
+      setToken(response.data.data.accessToken)
+      setUser(response.data.data.user)
+      toast.success("Account created successfully!")
       router.push(DASHBOARD_ROUTE)
 
       return INITIAL_STATE
@@ -86,7 +91,8 @@ export function useRegisterAction() {
         return { error: null, fieldErrors: { email: message } }
       }
 
-      return { error: message, fieldErrors: {} }
+      toast.error(message)
+      return INITIAL_STATE
     }
   }
 

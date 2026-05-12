@@ -2,14 +2,15 @@
 
 import { useActionState } from "react"
 import { useRouter } from "next/navigation"
-import { apiClient } from "@/lib/api-client"
-import { setAccessToken } from "@/lib/auth-store"
+import { axiosInstance } from "@/lib/api-client"
+import { useAuthStore } from "@/lib/auth-store"
+import { toast } from "sonner"
 
 interface LoginState {
   error: string | null
 }
 
-interface LoginResponse {
+interface LoginResponseData {
   user: {
     id: number
     name: string
@@ -23,6 +24,7 @@ const DASHBOARD_ROUTE = "/dashboard"
 
 export function useLoginAction() {
   const router = useRouter()
+  const { setUser, setToken } = useAuthStore()
 
   async function loginAction(
     _prevState: LoginState,
@@ -36,19 +38,22 @@ export function useLoginAction() {
     }
 
     try {
-      const data = await apiClient<LoginResponse>("/api/auth/login", {
-        method: "POST",
-        body: { email, password },
-      })
+      const response = await axiosInstance.post<{
+        status: string
+        data: LoginResponseData
+      }>("/api/auth/login", { email, password })
 
-      setAccessToken(data.accessToken)
+      setToken(response.data.data.accessToken)
+      setUser(response.data.data.user)
+      toast.success("Welcome back!")
       router.push(DASHBOARD_ROUTE)
 
       return { error: null }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Login failed. Try again."
-      return { error: message }
+      toast.error(message)
+      return { error: null }
     }
   }
 

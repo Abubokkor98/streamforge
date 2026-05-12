@@ -1,4 +1,4 @@
-import { FormField } from "@/components/shared/form-field"
+import { PasswordField } from "@/components/shared/password-field"
 import { FormAlert } from "@/components/shared/form-alert"
 import { SubmitButton } from "@/components/shared/submit-button"
 
@@ -20,10 +20,9 @@ function ResetPasswordForm({
     <form action={action} className="flex flex-col gap-5">
       <FormAlert message={error} />
 
-      <FormField
+      <PasswordField
         id="reset-new-password"
         name="newPassword"
-        type="password"
         label="New Password"
         placeholder="••••••••"
         autoComplete="new-password"
@@ -31,10 +30,9 @@ function ResetPasswordForm({
         required
       />
 
-      <FormField
+      <PasswordField
         id="reset-confirm-password"
         name="confirmPassword"
-        type="password"
         label="Confirm New Password"
         placeholder="••••••••"
         autoComplete="new-password"
