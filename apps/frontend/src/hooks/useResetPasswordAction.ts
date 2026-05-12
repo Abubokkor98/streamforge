@@ -2,7 +2,7 @@
 
 import { useActionState } from "react"
 import { useRouter } from "next/navigation"
-import { apiClient } from "@/lib/api-client"
+import { axiosInstance } from "@/lib/api-client"
 import { toast } from "sonner"
 import { validatePassword, validatePasswordMatch } from "@/lib/validation"
 import { safeSessionStorage } from "@/lib/safe-storage"
@@ -64,9 +64,9 @@ export function useResetPasswordAction() {
     }
 
     try {
-      await apiClient("/api/auth/reset-password", {
-        method: "POST",
-        body: { resetToken, newPassword },
+      await axiosInstance.post("/api/auth/reset-password", {
+        resetToken,
+        newPassword,
       })
 
       safeSessionStorage.removeItem(STORAGE_KEY_TOKEN)
@@ -77,6 +77,7 @@ export function useResetPasswordAction() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Reset failed."
+      toast.error(message)
       return { error: message, fieldErrors: {} }
     }
   }

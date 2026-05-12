@@ -2,8 +2,9 @@
 
 import { useActionState } from "react"
 import { useRouter } from "next/navigation"
-import { apiClient } from "@/lib/api-client"
+import { axiosInstance } from "@/lib/api-client"
 import { safeSessionStorage } from "@/lib/safe-storage"
+import { toast } from "sonner"
 
 interface ForgotPasswordState {
   error: string | null
@@ -28,10 +29,7 @@ export function useForgotPasswordAction() {
     }
 
     try {
-      await apiClient("/api/auth/forgot-password", {
-        method: "POST",
-        body: { email },
-      })
+      await axiosInstance.post("/api/auth/forgot-password", { email })
 
       safeSessionStorage.setItem(STORAGE_KEY_EMAIL, email)
       router.push(VERIFY_OTP_ROUTE)
@@ -40,7 +38,8 @@ export function useForgotPasswordAction() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Something went wrong."
-      return { error: message, success: false }
+      toast.error(message)
+      return INITIAL_STATE
     }
   }
 

@@ -2,8 +2,9 @@
 
 import { useActionState } from "react"
 import { useRouter } from "next/navigation"
-import { apiClient } from "@/lib/api-client"
+import { axiosInstance } from "@/lib/api-client"
 import { safeSessionStorage } from "@/lib/safe-storage"
+import { toast } from "sonner"
 
 interface VerifyOtpState {
   error: string | null
@@ -48,15 +49,12 @@ export function useVerifyOtpAction() {
     }
 
     try {
-      const data = await apiClient<VerifyOtpResponse>(
-        "/api/auth/verify-otp",
-        {
-          method: "POST",
-          body: { email, otp },
-        },
-      )
+      const response = await axiosInstance.post<{
+        status: string
+        data: VerifyOtpResponse
+      }>("/api/auth/verify-otp", { email, otp })
 
-      safeSessionStorage.setItem(STORAGE_KEY_TOKEN, data.resetToken)
+      safeSessionStorage.setItem(STORAGE_KEY_TOKEN, response.data.data.resetToken)
       safeSessionStorage.removeItem(STORAGE_KEY_EMAIL)
       router.push(RESET_PASSWORD_ROUTE)
 
@@ -64,7 +62,8 @@ export function useVerifyOtpAction() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Invalid OTP."
-      return { error: message }
+      toast.error(message)
+      return INITIAL_STATE
     }
   }
 

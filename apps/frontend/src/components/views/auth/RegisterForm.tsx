@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { FormField } from "@/components/shared/form-field"
+import { PasswordField } from "@/components/shared/password-field"
 import { FormAlert } from "@/components/shared/form-alert"
 import { SubmitButton } from "@/components/shared/submit-button"
 
@@ -41,10 +42,9 @@ function RegisterForm({ action, error, fieldErrors }: RegisterFormProps) {
         required
       />
 
-      <FormField
+      <PasswordField
         id="register-password"
         name="password"
-        type="password"
         label="Password"
         placeholder="••••••••"
         autoComplete="new-password"
@@ -52,10 +52,9 @@ function RegisterForm({ action, error, fieldErrors }: RegisterFormProps) {
         required
       />
 
-      <FormField
+      <PasswordField
         id="register-confirm-password"
         name="confirmPassword"
-        type="password"
         label="Confirm Password"
         placeholder="••••••••"
         autoComplete="new-password"

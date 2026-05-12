@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { FormField } from "@/components/shared/form-field"
+import { PasswordField } from "@/components/shared/password-field"
 import { FormAlert } from "@/components/shared/form-alert"
 import { SubmitButton } from "@/components/shared/submit-button"
 
@@ -23,10 +24,9 @@ function LoginForm({ action, error }: LoginFormProps) {
         required
       />
 
-      <FormField
+      <PasswordField
         id="login-password"
         name="password"
-        type="password"
         label="Password"
         placeholder="••••••••"
         autoComplete="current-password"
