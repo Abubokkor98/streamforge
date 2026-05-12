@@ -89,7 +89,7 @@ function HostBroadcastLayout({
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <StreamStats isLive={isLive} viewerCount={participantCount} />
+          <StreamStats isLive={isLive} viewerCount={Math.max(0, participantCount - 1)} />
         </div>
       </header>
 

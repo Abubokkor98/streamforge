@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useRef, useEffect } from "react"
 
 interface StreamTimerReturn {
   elapsedSeconds: number
@@ -8,39 +8,31 @@ interface StreamTimerReturn {
 }
 
 /**
- * A lightweight timer for broadcast sessions.
- * Follows React 19 best practices by adjusting state during render 
- * to avoid cascading effect renders.
+ * Minimal wall-clock timer for broadcast sessions.
+ * Uses Date.now() delta inside the interval callback to prevent drift
+ * in background tabs. No synchronous setState in the effect body.
  */
 export function useStreamTimer(isRunning: boolean): StreamTimerReturn {
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
-  const [prevIsRunning, setPrevIsRunning] = useState(isRunning)
-
-  // Adjust state during render when isRunning changes.
-  // This is the idiomatic way to reset state without an Effect.
-  if (isRunning !== prevIsRunning) {
-    setPrevIsRunning(isRunning)
-    setElapsedSeconds(0)
-  }
+  const startRef = useRef(0)
 
   useEffect(() => {
     if (!isRunning) return
 
+    startRef.current = Date.now()
+
     const intervalId = setInterval(() => {
-      setElapsedSeconds((s) => s + 1)
+      setElapsedSeconds(Math.floor((Date.now() - startRef.current) / 1000))
     }, 1000)
 
     return () => clearInterval(intervalId)
   }, [isRunning])
 
-  const format = (s: number) => {
-    const mins = Math.floor(s / 60)
-    const secs = s % 60
-    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+  const format = (totalSeconds: number): string => {
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
   }
 
-  return { 
-    elapsedSeconds, 
-    formattedTime: format(elapsedSeconds) 
-  }
+  return { elapsedSeconds, formattedTime: format(elapsedSeconds) }
 }
