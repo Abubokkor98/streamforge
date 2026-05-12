@@ -6,6 +6,7 @@ import "@livekit/components-styles"
 import { useRoom } from "@/hooks/useRoom"
 import { useLivekitToken } from "@/hooks/useLivekitToken"
 import { useIsAuthenticated } from "@/lib/auth-store"
+import { useSocket } from "@/hooks/useSocket"
 import { ViewerStreamLayout } from "@/components/views/stream/ViewerStreamLayout"
 import { GuestNamePrompt } from "@/components/views/stream/GuestNamePrompt"
 import { WaitingForHost } from "@/components/views/stream/WaitingForHost"
@@ -24,6 +25,9 @@ function ViewerView({ roomKey }: ViewerViewProps) {
   const [guestName, setGuestName] = useState<string | null>(null)
 
   const { room, isLoading: isRoomLoading, error: roomError } = useRoom(roomKey, 15000)
+
+  // Socket connection — auth user or guest
+  useSocket({ guestName: guestName ?? undefined })
 
   // Token is fetched only when the viewer is ready (authenticated OR guest name provided)
   const isReadyToConnect = isAuthenticated || guestName !== null
@@ -82,7 +86,10 @@ function ViewerView({ roomKey }: ViewerViewProps) {
       video={false}
       audio={false}
     >
-      <ViewerStreamLayout room={room} />
+      <ViewerStreamLayout
+        room={room}
+        guestChatEnabled={room.guestChatEnabled}
+      />
     </LiveKitRoom>
   )
 }
