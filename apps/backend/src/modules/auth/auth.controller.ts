@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ApiError } from '@/utils/api-error';
+import { logger } from '@/utils/logger';
 import { setAuthCookies, clearAuthCookies, getRefreshTokenFromCookie } from '@/shared/cookies';
 import * as authService from '@/modules/auth/auth.service';
 import type {
@@ -18,14 +19,14 @@ export async function register(
 ): Promise<void> {
   try {
     const { name, email, password } = req.body as RegisterInput;
-    console.log(`[Auth] Registering user: ${email}`);
+    logger.info({ email }, '[Auth] Registering user');
     const { refreshToken, accessToken, ...userData } = await authService.register({ name, email, password });
 
-    console.log(`[Auth] User registered successfully. Setting cookies.`);
+    logger.info({ email }, '[Auth] User registered. Cookies set');
     setAuthCookies(res, accessToken, refreshToken);
     res.status(StatusCodes.CREATED).json({ status: 'success', data: { user: userData.user, accessToken } });
   } catch (error) {
-    console.error(`[Auth] Registration error:`, error);
+    logger.error({ err: error, email: (req.body as RegisterInput).email }, '[Auth] Registration failed');
     next(error);
   }
 }
@@ -37,14 +38,14 @@ export async function login(
 ): Promise<void> {
   try {
     const body = req.body as LoginInput;
-    console.log(`[Auth] Logging in user: ${body.email}`);
+    logger.info({ email: body.email }, '[Auth] Login attempt');
     const { refreshToken, accessToken, ...userData } = await authService.login(body);
 
-    console.log(`[Auth] User logged in successfully. Setting cookies.`);
+    logger.info({ email: body.email }, '[Auth] Login successful. Cookies set');
     setAuthCookies(res, accessToken, refreshToken);
     res.status(StatusCodes.OK).json({ status: 'success', data: { user: userData.user, accessToken } });
   } catch (error) {
-    console.error(`[Auth] Login error:`, error);
+    logger.error({ err: error, email: (req.body as LoginInput).email }, '[Auth] Login failed');
     next(error);
   }
 }

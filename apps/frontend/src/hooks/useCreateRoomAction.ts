@@ -66,7 +66,7 @@ export function useCreateRoomAction() {
       const message =
         error instanceof Error ? error.message : "Failed to create room."
       toast.error(message)
-      return INITIAL_STATE
+      return { ...INITIAL_STATE, error: message }
     }
   }
 

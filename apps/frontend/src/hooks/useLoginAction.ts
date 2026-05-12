@@ -53,7 +53,7 @@ export function useLoginAction() {
       const message =
         error instanceof Error ? error.message : "Login failed. Try again."
       toast.error(message)
-      return { error: null }
+      return { error: message }
     }
   }
 

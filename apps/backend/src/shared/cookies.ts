@@ -4,12 +4,16 @@ import { REFRESH_TOKEN_EXPIRY_DAYS } from '@/utils/otp';
 const ACCESS_TOKEN_COOKIE = 'accessToken';
 const REFRESH_TOKEN_COOKIE = 'refreshToken';
 
-const ACCESS_TOKEN_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
+const ACCESS_TOKEN_DURATION_MINUTES = 15;
+const ACCESS_TOKEN_MAX_AGE_MS = ACCESS_TOKEN_DURATION_MINUTES * 60 * 1000;
 const REFRESH_TOKEN_MAX_AGE_MS = REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
 
 /**
  * Cookie options — consistent across set/clear operations.
- * Matches the IELTS app pattern: httpOnly, secure in prod, sameSite lax, path /.
+ * - httpOnly: prevents client-side JS access (XSS protection)
+ * - secure: HTTPS-only in production
+ * - sameSite: 'none' in production (cross-origin), 'lax' in dev
+ * - path: '/' — available on all routes
  */
 function getAuthCookieOptions() {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -23,7 +27,7 @@ function getAuthCookieOptions() {
 }
 
 /**
- * Set BOTH auth cookies — matches the IELTS app pattern.
+ * Set BOTH auth cookies atomically.
  * Access token cookie (15min) + refresh token cookie (7 days).
  */
 export function setAuthCookies(

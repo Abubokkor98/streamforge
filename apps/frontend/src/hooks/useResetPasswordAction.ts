@@ -78,7 +78,7 @@ export function useResetPasswordAction() {
       const message =
         error instanceof Error ? error.message : "Reset failed."
       toast.error(message)
-      return INITIAL_STATE
+      return { error: message, fieldErrors: {} }
     }
   }
 

@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <Navbar />
       <div className="flex flex-1">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-4 pb-18 lg:p-6 lg:pb-6">
+        <main className="flex-1 overflow-y-auto p-4 pb-20 lg:p-6 lg:pb-6">
           {children}
         </main>
       </div>

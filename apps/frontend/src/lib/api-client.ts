@@ -1,4 +1,4 @@
-import axios, { type InternalAxiosRequestConfig } from "axios"
+import axios, { isAxiosError, type InternalAxiosRequestConfig } from "axios"
 import { useAuthStore } from "@/lib/auth-store"
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -55,7 +55,8 @@ axiosInstance.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !shouldSkipRefresh(originalRequest.url)
+      !shouldSkipRefresh(originalRequest.url) &&
+      typeof window !== "undefined" // Skip refresh on server — no browser cookies available
     ) {
       originalRequest._retry = true
 
@@ -87,13 +88,10 @@ axiosInstance.interceptors.response.use(
           useAuthStore.getState().setToken(accessToken)
           return accessToken
         } catch (refreshError: unknown) {
-          const axiosError = refreshError as {
-            response?: { status?: number }
-          }
-
           const isAuthError =
-            axiosError.response?.status === 401 ||
-            axiosError.response?.status === 403
+            isAxiosError(refreshError) &&
+            (refreshError.response?.status === 401 ||
+              refreshError.response?.status === 403)
 
           if (isAuthError) {
             useAuthStore.getState().logout()

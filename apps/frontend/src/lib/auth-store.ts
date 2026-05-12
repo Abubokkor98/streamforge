@@ -16,7 +16,8 @@ interface AuthState {
   logout: () => void
 }
 
-export const selectIsAuthenticated = (state: AuthState): boolean => !!state.user
+export const selectIsAuthenticated = (state: AuthState): boolean =>
+  !!state.user && !!state.accessToken
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -30,6 +31,9 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "sf-auth-storage",
+      // Only persist user — accessToken stays in-memory for security.
+      // After page refresh, the interceptor refreshes via HttpOnly cookie.
+      partialize: (state) => ({ user: state.user }),
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.hasHydrated = true

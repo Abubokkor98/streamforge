@@ -3,15 +3,36 @@
 import Link from "next/link"
 import { useRooms } from "@/hooks/useRooms"
 import { RoomCard } from "@/components/views/dashboard/RoomCard"
+import { DashboardSkeleton } from "@/components/views/dashboard/DashboardSkeleton"
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "@phosphor-icons/react"
 
 /**
- * Rendered inside a Suspense boundary — `use()` in useRooms
- * suspends this component until data resolves.
+ * Handles its own loading/error states via useRooms hook.
+ * No Suspense/ErrorBoundary needed — useEffect pattern is self-contained.
  */
 function DashboardView() {
-  const { rooms, refetch } = useRooms()
+  const { rooms, isLoading, error, refetch } = useRooms()
+
+  if (isLoading) {
+    return <DashboardSkeleton />
+  }
+
+  if (error) {
+    return (
+      <section className="flex flex-col items-center gap-4 py-20 text-center">
+        <h2 className="text-lg font-semibold text-destructive">
+          Failed to load rooms
+        </h2>
+        <p className="max-w-sm text-sm text-muted-foreground">
+          {error?.message ?? "Something went wrong."}
+        </p>
+        <Button onClick={refetch} variant="outline">
+          Try again
+        </Button>
+      </section>
+    )
+  }
 
   if (rooms.length === 0) {
     return (

@@ -35,7 +35,7 @@ class DashboardError extends Component<DashboardErrorProps, DashboardErrorState>
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center gap-4 py-20 text-center">
+        <div role="alert" aria-live="assertive" aria-atomic="true" className="flex flex-col items-center gap-4 py-20 text-center">
           <p className="text-sm text-destructive">{this.state.message}</p>
           <Button variant="outline" size="sm" onClick={this.handleRetry}>
             Try again

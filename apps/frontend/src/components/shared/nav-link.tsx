@@ -32,7 +32,7 @@ function NavLink({ href, label, icon, variant = "sidebar" }: NavLinkProps) {
 
   const isActive =
     pathname === href ||
-    (href !== "/dashboard" && pathname.startsWith(href))
+    (href !== "/dashboard" && (pathname.startsWith(href + "/") || pathname === href))
 
   const styles = variant === "mobile" ? MOBILE_STYLES : SIDEBAR_STYLES
 

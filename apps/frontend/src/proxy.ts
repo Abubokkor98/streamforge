@@ -14,11 +14,8 @@ const LOGIN_PATH = "/login"
  */
 export function proxy(request: NextRequest) {
   const hasSession = request.cookies.has(REFRESH_TOKEN_COOKIE)
-  
-  console.log(`[Proxy] Checking auth for ${request.nextUrl.pathname}. Has session: ${hasSession}`)
 
   if (!hasSession) {
-    console.log(`[Proxy] No session found. Redirecting to login.`)
     const loginUrl = new URL(LOGIN_PATH, request.url)
     loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname)
     return NextResponse.redirect(loginUrl)

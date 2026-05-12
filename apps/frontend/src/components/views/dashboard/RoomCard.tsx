@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -41,9 +43,13 @@ function RoomCard({ room, onDeleted }: RoomCardProps) {
   const isOffline = room.status === "OFFLINE"
 
   async function handleCopyLink() {
-    const streamUrl = `${window.location.origin}/stream/${room.roomKey}`
-    await navigator.clipboard.writeText(streamUrl)
-    toast.success("Stream link copied!")
+    try {
+      const streamUrl = `${window.location.origin}/stream/${room.roomKey}`
+      await navigator.clipboard.writeText(streamUrl)
+      toast.success("Stream link copied!")
+    } catch {
+      toast.error("Failed to copy link.")
+    }
   }
 
   async function handleDelete() {

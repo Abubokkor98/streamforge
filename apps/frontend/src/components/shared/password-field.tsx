@@ -39,6 +39,7 @@ function PasswordField({ label, error, id, ...inputProps }: PasswordFieldProps) 
           onClick={() => setIsVisible((prev) => !prev)}
           className="absolute right-0 top-0 flex h-full w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
           aria-label={isVisible ? "Hide password" : "Show password"}
+          aria-pressed={isVisible}
         >
           {isVisible ? (
             <EyeSlash className="size-4" aria-hidden="true" />
