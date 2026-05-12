@@ -4,6 +4,8 @@ import { ApiError } from '@/utils/api-error';
 import { toStreamSessionResponse } from '@/helpers/streams.helpers';
 import type { StreamSessionResponse } from '@/modules/streams/streams.types';
 
+const MS_PER_SECOND = 1000;
+
 async function getOwnedRoomOrThrow(roomKey: string, hostId: number) {
   const room = await prisma.room.findUnique({ where: { room_key: roomKey } });
 
@@ -65,7 +67,7 @@ export async function endStream(
 
   const now = new Date();
   const durationMs = now.getTime() - activeSession.started_at.getTime();
-  const durationSeconds = Math.floor(durationMs / 1000);
+  const durationSeconds = Math.floor(durationMs / MS_PER_SECOND);
 
   const [updatedSession] = await prisma.$transaction([
     prisma.streamSession.update({

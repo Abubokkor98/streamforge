@@ -17,13 +17,6 @@ export const livekitTokenSchema = z
         error: `Guest name must not exceed ${GUEST_NAME_MAX_LENGTH} characters`,
       })
       .optional(),
-  })
-  .refine(
-    (data) => data.isHost || data.guestName !== undefined,
-    {
-      message: 'guestName is required for viewer tokens when not authenticated',
-      path: ['guestName'],
-    },
-  );
+  });
 
 export type LiveKitTokenSchemaInput = z.infer<typeof livekitTokenSchema>;

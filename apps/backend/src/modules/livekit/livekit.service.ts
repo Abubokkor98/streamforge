@@ -47,10 +47,14 @@ export async function generateToken(
       select: { name: true },
     });
 
+    if (!user) {
+      throw ApiError.unauthorized('Invalid or inactive user');
+    }
+
     return createToken({
       roomKey: input.roomKey,
       identity: `user_${authenticatedUserId}`,
-      name: user?.name ?? 'Viewer',
+      name: user.name,
       canPublish: false,
       canSubscribe: true,
     });
