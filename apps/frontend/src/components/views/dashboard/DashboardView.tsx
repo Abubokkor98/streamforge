@@ -1,11 +1,10 @@
 "use client"
 
-import Link from "next/link"
 import { useRooms } from "@/hooks/useRooms"
 import { RoomCard } from "@/components/views/dashboard/RoomCard"
 import { DashboardSkeleton } from "@/components/views/dashboard/DashboardSkeleton"
+import { CreateRoomDialog } from "@/components/views/dashboard/CreateRoomDialog"
 import { Button } from "@/components/ui/button"
-import { PlusCircle } from "@phosphor-icons/react"
 
 /**
  * Handles its own loading/error states via useRooms hook.
@@ -41,12 +40,7 @@ function DashboardView() {
         <p className="max-w-sm text-sm text-muted-foreground">
           Create your first streaming room to get started.
         </p>
-        <Button asChild className="gap-2">
-          <Link href="/dashboard/create-room">
-            <PlusCircle className="size-4" aria-hidden="true" />
-            Create Room
-          </Link>
-        </Button>
+        <CreateRoomDialog />
       </section>
     )
   }
@@ -55,12 +49,13 @@ function DashboardView() {
     <section className="space-y-4">
       <header className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-foreground">Your Rooms</h2>
-        <Button asChild size="sm" className="gap-2">
-          <Link href="/dashboard/create-room">
-            <PlusCircle className="size-4" aria-hidden="true" />
-            Create Room
-          </Link>
-        </Button>
+        <CreateRoomDialog
+          trigger={
+            <Button size="sm" className="gap-2">
+              Create Room
+            </Button>
+          }
+        />
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

@@ -18,6 +18,18 @@ export const createRoomSchema = z.object({
       error: `Description must not exceed ${DESCRIPTION_MAX_LENGTH} characters`,
     })
     .optional(),
+  slowModeInterval: z
+    .number()
+    .int({ error: 'Slow mode interval must be a whole number' })
+    .min(SLOW_MODE_MIN_SECONDS, {
+      error: `Slow mode interval must be at least ${SLOW_MODE_MIN_SECONDS} second`,
+    })
+    .max(SLOW_MODE_MAX_SECONDS, {
+      error: `Slow mode interval must not exceed ${SLOW_MODE_MAX_SECONDS} seconds`,
+    })
+    .nullable()
+    .optional(),
+  guestChatEnabled: z.boolean().optional(),
 });
 
 export const updateRoomSchema = z.object({
@@ -33,6 +45,7 @@ export const updateRoomSchema = z.object({
     .max(DESCRIPTION_MAX_LENGTH, {
       error: `Description must not exceed ${DESCRIPTION_MAX_LENGTH} characters`,
     })
+    .nullable()
     .optional(),
   slowModeInterval: z
     .number()

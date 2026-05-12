@@ -16,11 +16,13 @@ export interface RoomResponse {
 export interface CreateRoomInput {
   title: string;
   description?: string;
+  slowModeInterval?: number | null;
+  guestChatEnabled?: boolean;
 }
 
 export interface UpdateRoomInput {
   title?: string;
-  description?: string;
+  description?: string | null;
   slowModeInterval?: number | null;
   guestChatEnabled?: boolean;
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { EditRoomDialog } from "@/components/views/dashboard/EditRoomDialog"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -12,7 +13,7 @@ import {
   CardFooter,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Copy, Pencil, Trash, Play } from "@phosphor-icons/react"
+import { Copy, Trash, Play } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import { axiosInstance } from "@/lib/api-client"
 import type { Room, RoomStatus } from "@/lib/types/room"
@@ -107,12 +108,7 @@ function RoomCard({ room, onDeleted }: RoomCardProps) {
           Copy Link
         </Button>
 
-        <Button variant="outline" size="sm" className="gap-1.5" asChild>
-          <Link href={`/dashboard/rooms/${room.roomKey}/edit`}>
-            <Pencil className="size-3.5" aria-hidden="true" />
-            Edit
-          </Link>
-        </Button>
+        <EditRoomDialog room={room} />
 
         {isOffline && (
           <Button
