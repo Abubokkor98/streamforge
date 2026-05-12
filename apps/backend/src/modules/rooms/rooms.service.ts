@@ -11,6 +11,8 @@ import type {
 
 const ROOM_KEY_LENGTH = 12;
 
+const HOST_SELECT = { host: { select: { name: true } } } as const;
+
 async function getOwnedRoomOrThrow(roomKey: string, hostId: number) {
   const room = await prisma.room.findUnique({ where: { room_key: roomKey } });
   if (!room) throw ApiError.notFound('Room not found');
@@ -30,6 +32,7 @@ export async function createRoom(hostId: number, input: CreateRoomInput): Promis
       slow_mode_interval: input.slowModeInterval,
       guest_chat_enabled: input.guestChatEnabled,
     },
+    include: HOST_SELECT,
   });
 
   return toRoomResponse(room);
@@ -39,6 +42,7 @@ export async function getHostRooms(hostId: number): Promise<RoomResponse[]> {
   const rooms = await prisma.room.findMany({
     where: { host_id: hostId },
     orderBy: { created_at: 'desc' },
+    include: HOST_SELECT,
   });
 
   return rooms.map(toRoomResponse);
@@ -47,6 +51,7 @@ export async function getHostRooms(hostId: number): Promise<RoomResponse[]> {
 export async function findRoomByKey(roomKey: string): Promise<RoomResponse> {
   const room = await prisma.room.findUnique({
     where: { room_key: roomKey },
+    include: HOST_SELECT,
   });
 
   if (!room) {
@@ -71,6 +76,7 @@ export async function updateRoom(
       slow_mode_interval: input.slowModeInterval,
       guest_chat_enabled: input.guestChatEnabled,
     },
+    include: HOST_SELECT,
   });
 
   return toRoomResponse(updated);
@@ -87,3 +93,4 @@ export async function deleteRoom(roomKey: string, hostId: number): Promise<void>
     where: { room_key: roomKey },
   });
 }
+

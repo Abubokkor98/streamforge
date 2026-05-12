@@ -12,6 +12,7 @@ interface PrismaRoomRow {
   guest_chat_enabled: boolean;
   created_at: Date;
   updated_at: Date;
+  host: { name: string };
 }
 
 export function toRoomResponse(room: PrismaRoomRow): RoomResponse {
@@ -24,7 +25,9 @@ export function toRoomResponse(room: PrismaRoomRow): RoomResponse {
     status: room.status,
     slowModeInterval: room.slow_mode_interval,
     guestChatEnabled: room.guest_chat_enabled,
+    hostName: room.host.name,
     createdAt: room.created_at,
     updatedAt: room.updated_at,
   };
 }
+
