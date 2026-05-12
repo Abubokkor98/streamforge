@@ -17,7 +17,10 @@ export function proxy(request: NextRequest) {
 
   if (!hasSession) {
     const loginUrl = new URL(LOGIN_PATH, request.url)
-    loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname)
+    loginUrl.searchParams.set(
+      "callbackUrl",
+      `${request.nextUrl.pathname}${request.nextUrl.search}`,
+    )
     return NextResponse.redirect(loginUrl)
   }
 

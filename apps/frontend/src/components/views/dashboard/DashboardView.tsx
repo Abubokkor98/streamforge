@@ -9,7 +9,7 @@ import { PlusCircle } from "@phosphor-icons/react"
 
 /**
  * Handles its own loading/error states via useRooms hook.
- * No Suspense/ErrorBoundary needed — useEffect pattern is self-contained.
+ * No Suspense/ErrorBoundary needed — React Query manages loading/error states internally.
  */
 function DashboardView() {
   const { rooms, isLoading, error, refetch } = useRooms()

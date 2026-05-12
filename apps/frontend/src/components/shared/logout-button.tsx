@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/lib/api-client"
 import { useAuthStore } from "@/lib/auth-store"
@@ -19,8 +20,11 @@ const LOGIN_ROUTE = "/login"
 function LogoutButton() {
   const router = useRouter()
   const logout = useAuthStore((state) => state.logout)
+  const [isPending, setIsPending] = useState(false)
 
   async function handleLogout() {
+    if (isPending) return
+    setIsPending(true)
     try {
       await axiosInstance.post(LOGOUT_ENDPOINT)
 
@@ -34,6 +38,8 @@ function LogoutButton() {
 
       toast.error(message)
       // Don't clear state — user stays logged in if backend call fails
+    } finally {
+      setIsPending(false)
     }
   }
 
@@ -42,10 +48,11 @@ function LogoutButton() {
       variant="ghost"
       size="sm"
       onClick={handleLogout}
+      disabled={isPending}
       className="gap-2 text-muted-foreground hover:text-destructive"
     >
       <SignOut className="size-4" aria-hidden="true" />
-      Sign out
+      {isPending ? "Signing out…" : "Sign out"}
     </Button>
   )
 }
