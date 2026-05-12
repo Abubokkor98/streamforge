@@ -35,6 +35,10 @@ function ViewerView({ roomKey }: ViewerViewProps) {
       enabled: isReadyToConnect && room?.status === "LIVE",
     })
 
+  if (!LIVEKIT_URL) {
+    return <HostViewError message="NEXT_PUBLIC_LIVEKIT_URL is not defined in environment variables." />
+  }
+
   if (isRoomLoading) {
     return <HostViewSkeleton />
   }

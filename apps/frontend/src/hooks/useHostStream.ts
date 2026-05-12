@@ -22,24 +22,28 @@ export function useHostStreamActions(roomKey: string): HostStreamActions {
   const [phase, setPhase] = useState<HostStreamPhase>("preview")
 
   const goLive = useCallback(async () => {
+    const encodedKey = encodeURIComponent(roomKey)
     try {
-      await axiosInstance.post(`${STREAM_ENDPOINT}/${roomKey}/start`)
+      await axiosInstance.post(`${STREAM_ENDPOINT}/${encodedKey}/start`)
       setPhase("live")
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to start stream"
       toast.error(message)
+      throw error
     }
   }, [roomKey])
 
   const endStream = useCallback(async () => {
+    const encodedKey = encodeURIComponent(roomKey)
     try {
-      await axiosInstance.post(`${STREAM_ENDPOINT}/${roomKey}/end`)
+      await axiosInstance.post(`${STREAM_ENDPOINT}/${encodedKey}/end`)
       setPhase("ended")
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to end stream"
       toast.error(message)
+      throw error
     }
   }, [roomKey])
 

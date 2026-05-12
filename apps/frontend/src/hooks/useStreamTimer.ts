@@ -1,56 +1,46 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
-
-const TIMER_INTERVAL_MS = 1000
-const MS_PER_SECOND = 1000
+import { useState, useEffect } from "react"
 
 interface StreamTimerReturn {
   elapsedSeconds: number
   formattedTime: string
 }
 
-function formatElapsedTime(totalSeconds: number): string {
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-
-  const pad = (n: number) => String(n).padStart(2, "0")
-
-  if (hours > 0) {
-    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
-  }
-
-  return `${pad(minutes)}:${pad(seconds)}`
-}
-
 /**
- * Automatically starts/stops the timer based on the `isRunning` flag.
- * Uses a start timestamp ref to compute elapsed time — avoids
- * calling setState synchronously inside the effect body.
+ * A lightweight timer for broadcast sessions.
+ * Follows React 19 best practices by adjusting state during render 
+ * to avoid cascading effect renders.
  */
 export function useStreamTimer(isRunning: boolean): StreamTimerReturn {
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
-  const startTimeRef = useRef<number>(0)
+  const [prevIsRunning, setPrevIsRunning] = useState(isRunning)
+
+  // Adjust state during render when isRunning changes.
+  // This is the idiomatic way to reset state without an Effect.
+  if (isRunning !== prevIsRunning) {
+    setPrevIsRunning(isRunning)
+    setElapsedSeconds(0)
+  }
 
   useEffect(() => {
-    if (!isRunning) {
-      return
-    }
-
-    startTimeRef.current = Date.now()
+    if (!isRunning) return
 
     const intervalId = setInterval(() => {
-      const elapsed = Math.floor(
-        (Date.now() - startTimeRef.current) / MS_PER_SECOND,
-      )
-      setElapsedSeconds(elapsed)
-    }, TIMER_INTERVAL_MS)
+      setElapsedSeconds((s) => s + 1)
+    }, 1000)
 
-    return () => {
-      clearInterval(intervalId)
-    }
+    return () => clearInterval(intervalId)
   }, [isRunning])
 
-  return { elapsedSeconds, formattedTime: formatElapsedTime(elapsedSeconds) }
+  const format = (s: number) => {
+    const mins = Math.floor(s / 60)
+    const secs = s % 60
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+  }
+
+  return { 
+    elapsedSeconds, 
+    formattedTime: format(elapsedSeconds) 
+  }
 }

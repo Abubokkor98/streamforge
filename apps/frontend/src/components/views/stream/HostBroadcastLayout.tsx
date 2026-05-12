@@ -41,9 +41,6 @@ function HostBroadcastLayout({
 
   const participantCount = livekitRoom.numParticipants
 
-  async function handleGoLive() {
-    await onGoLive()
-  }
 
   return (
     <main className="relative flex h-dvh w-full flex-col overflow-hidden bg-black text-white">
@@ -99,7 +96,7 @@ function HostBroadcastLayout({
       {/* Floating Footer / Controls */}
       <footer className="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-6 bg-linear-to-t from-black/80 via-black/40 to-transparent pb-10 pt-20">
         <div className="flex items-center gap-4 rounded-3xl border border-white/10 bg-black/40 p-2 backdrop-blur-2xl shadow-2xl">
-          <BroadcastControls isLive={isLive} onGoLive={handleGoLive} />
+          <BroadcastControls isLive={isLive} onGoLive={onGoLive} />
           {isLive && (
             <>
               <div className="h-8 w-px bg-white/10 mx-1" />

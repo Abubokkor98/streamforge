@@ -22,6 +22,10 @@ function HostView({ roomKey }: HostViewProps) {
     useLivekitToken({ roomKey, isHost: true })
   const { phase, goLive, endStream } = useHostStreamActions(roomKey)
 
+  if (!LIVEKIT_URL) {
+    return <HostViewError message="NEXT_PUBLIC_LIVEKIT_URL is not defined in environment variables." />
+  }
+
   if (isRoomLoading || isTokenLoading) {
     return <HostViewSkeleton />
   }

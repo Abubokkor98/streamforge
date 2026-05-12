@@ -10,8 +10,9 @@ const ROOM_STALE_TIME = 5 * 60 * 1000
 const ROOM_GC_TIME = 30 * 60 * 1000
 
 async function fetchRoom(roomKey: string): Promise<Room> {
+  const encodedKey = encodeURIComponent(roomKey)
   const response = await axiosInstance.get<ApiResponse<Room>>(
-    `${ROOMS_ENDPOINT}/${roomKey}`,
+    `${ROOMS_ENDPOINT}/${encodedKey}`,
   )
   return response.data.data
 }

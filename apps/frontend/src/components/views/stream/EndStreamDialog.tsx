@@ -23,9 +23,12 @@ function EndStreamDialog({ onConfirm }: EndStreamDialogProps) {
 
   async function handleConfirm() {
     setIsEnding(true)
-    await onConfirm()
-    setIsOpen(false)
-    setIsEnding(false)
+    try {
+      await onConfirm()
+      setIsOpen(false)
+    } finally {
+      setIsEnding(false)
+    }
   }
 
   return (
