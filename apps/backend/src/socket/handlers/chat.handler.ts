@@ -73,13 +73,8 @@ export function registerChatHandlers(io: TypedServer, socket: TypedSocket): void
 
       const { messageId, roomKey } = parsed.data;
 
-      if (!socket.data.isHost) {
+      if (!socket.data.isHost || !socket.data.userId) {
         socket.emit('error', { message: 'Only the host can delete messages' });
-        return;
-      }
-
-      if (!socket.data.userId) {
-        socket.emit('error', { message: 'Authentication required' });
         return;
       }
 
@@ -104,13 +99,8 @@ export function registerChatHandlers(io: TypedServer, socket: TypedSocket): void
 
       const { messageId, roomKey, isPinned } = parsed.data;
 
-      if (!socket.data.isHost) {
+      if (!socket.data.isHost || !socket.data.userId) {
         socket.emit('error', { message: 'Only the host can pin messages' });
-        return;
-      }
-
-      if (!socket.data.userId) {
-        socket.emit('error', { message: 'Authentication required' });
         return;
       }
 

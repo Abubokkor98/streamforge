@@ -12,6 +12,19 @@ const DEFAULT_HISTORY_LIMIT = 50;
 // Guests use `guest:senderName:roomKey` as key.
 const lastMessageTimestamps = new Map<string, number>();
 
+// Periodic cleanup to prevent unbounded memory growth
+const SLOW_MODE_CLEANUP_INTERVAL_MS = 10 * 60 * 1000;
+const SLOW_MODE_ENTRY_TTL_MS = 60 * 60 * 1000;
+
+setInterval(() => {
+  const cutoff = Date.now() - SLOW_MODE_ENTRY_TTL_MS;
+  for (const [key, timestamp] of lastMessageTimestamps.entries()) {
+    if (timestamp < cutoff) {
+      lastMessageTimestamps.delete(key);
+    }
+  }
+}, SLOW_MODE_CLEANUP_INTERVAL_MS);
+
 function getSlowModeKey(senderId: number | null, senderName: string, roomKey: string): string {
   if (senderId) {
     return `${senderId}:${roomKey}`;
@@ -146,11 +159,11 @@ export async function getRecentMessages(
       session_id: session.id,
       is_deleted: false,
     },
-    orderBy: { created_at: 'asc' },
+    orderBy: { created_at: 'desc' },
     take: limit,
   });
 
-  return messages.map(toChatMessageResponse);
+  return messages.reverse().map(toChatMessageResponse);
 }
 
 export async function deleteMessage(messageId: number, hostId: number): Promise<void> {
@@ -198,6 +211,8 @@ export async function pinMessage(messageId: number, hostId: number): Promise<voi
       data: { is_pinned: true },
     }),
   ]);
+
+  logger.info({ messageId }, '[Chat Service] Message pinned');
 }
 
 export async function unpinMessage(messageId: number, hostId: number): Promise<void> {

@@ -20,7 +20,7 @@ function getRoomViewerCount(io: TypedServer, roomKey: string): number {
   return io.sockets.adapter.rooms.get(roomKey)?.size ?? 0;
 }
 
-async function broadcastViewerCount(io: TypedServer, roomKey: string): Promise<void> {
+function broadcastViewerCount(io: TypedServer, roomKey: string): void {
   const count = getRoomViewerCount(io, roomKey);
   io.to(roomKey).emit('viewer-count-updated', { roomKey, count });
 }

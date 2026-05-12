@@ -24,10 +24,12 @@ export function registerReactionHandlers(io: TypedServer, socket: TypedSocket): 
     const { roomKey, emoji } = payload;
 
     if (!roomKey || !emoji) {
+      socket.emit('error', { message: 'Missing reaction parameters' });
       return;
     }
 
     if (!ALLOWED_EMOJIS.has(emoji)) {
+      socket.emit('error', { message: 'Invalid emoji' });
       return;
     }
 

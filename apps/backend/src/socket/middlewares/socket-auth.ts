@@ -17,7 +17,7 @@ import { z } from 'zod';
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 
 const tokenPayloadSchema = z.object({
-  userId: z.number(),
+  userId: z.number().int().positive(),
   email: z.string(),
 });
 
