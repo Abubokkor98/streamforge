@@ -13,8 +13,10 @@ interface Room {
   status: RoomStatus
   slowModeInterval: number | null
   guestChatEnabled: boolean
+  hostName: string
   createdAt: string
   updatedAt: string
 }
 
 export type { Room, RoomStatus }
+

@@ -15,6 +15,9 @@ interface EnvironmentConfig {
   SMTP_PASS: string;
   SMTP_FROM: string;
   FRONTEND_URL: string;
+  LIVEKIT_URL: string;
+  LIVEKIT_API_KEY: string;
+  LIVEKIT_API_SECRET: string;
 }
 
 function getRequiredEnv(key: string): string {
@@ -50,4 +53,7 @@ export const env: EnvironmentConfig = {
   SMTP_PASS: getRequiredEnv('SMTP_PASS'),
   SMTP_FROM: getRequiredEnv('SMTP_FROM'),
   FRONTEND_URL: getRequiredEnv('FRONTEND_URL'),
+  LIVEKIT_URL: getRequiredEnv('LIVEKIT_URL'),
+  LIVEKIT_API_KEY: getRequiredEnv('LIVEKIT_API_KEY'),
+  LIVEKIT_API_SECRET: getRequiredEnv('LIVEKIT_API_SECRET'),
 };
