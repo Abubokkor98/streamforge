@@ -16,6 +16,8 @@ export interface RoomResponse {
 export interface CreateRoomInput {
   title: string;
   description?: string;
+  slowModeInterval?: number | null;
+  guestChatEnabled?: boolean;
 }
 
 export interface UpdateRoomInput {

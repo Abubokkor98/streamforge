@@ -27,6 +27,8 @@ export async function createRoom(hostId: number, input: CreateRoomInput): Promis
       room_key: roomKey,
       title: input.title,
       description: input.description,
+      slow_mode_interval: input.slowModeInterval,
+      guest_chat_enabled: input.guestChatEnabled,
     },
   });
 
