@@ -17,6 +17,7 @@ interface RoomFormFieldsProps {
 }
 
 const DESCRIPTION_MAX_LENGTH = 500
+const SLOW_MODE_MIN = 1
 const SLOW_MODE_MAX = 60
 
 /**
@@ -74,8 +75,9 @@ function RoomFormFields({ idPrefix, defaultValues, fieldErrors }: RoomFormFields
         label="Slow Mode (seconds)"
         placeholder="Off"
         defaultValue={defaultValues?.slowModeInterval ?? ""}
-        min={1}
+        min={SLOW_MODE_MIN}
         max={SLOW_MODE_MAX}
+        step={1}
         error={fieldErrors.slowModeInterval}
       />
 

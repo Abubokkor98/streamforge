@@ -45,6 +45,7 @@ export const updateRoomSchema = z.object({
     .max(DESCRIPTION_MAX_LENGTH, {
       error: `Description must not exceed ${DESCRIPTION_MAX_LENGTH} characters`,
     })
+    .nullable()
     .optional(),
   slowModeInterval: z
     .number()

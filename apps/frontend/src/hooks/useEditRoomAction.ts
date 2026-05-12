@@ -74,7 +74,7 @@ export function useEditRoomAction(roomKey: string) {
         data: Room
       }>(`${ROOMS_ENDPOINT}/${roomKey}`, {
         title,
-        description: description || undefined,
+        description: description || null,
         slowModeInterval,
         guestChatEnabled,
       })

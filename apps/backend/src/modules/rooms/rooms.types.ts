@@ -22,7 +22,7 @@ export interface CreateRoomInput {
 
 export interface UpdateRoomInput {
   title?: string;
-  description?: string;
+  description?: string | null;
   slowModeInterval?: number | null;
   guestChatEnabled?: boolean;
 }
