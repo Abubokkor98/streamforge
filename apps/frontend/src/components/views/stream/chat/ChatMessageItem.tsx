@@ -17,7 +17,7 @@ function ChatMessageItem({
   onDelete,
   onPin,
 }: ChatMessageItemProps) {
-  const isPending = "pending" in message && message.pending
+  const isPending = !!message.pending
 
   return (
     <article

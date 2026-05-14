@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { socket } from "@/lib/socket"
 import type { ReactionBroadcast } from "@/lib/types/socket-events"
 
@@ -26,6 +26,7 @@ export function useReactions({
 }: UseReactionsOptions): UseReactionsReturn {
   const [activeReactions, setActiveReactions] = useState<ActiveReaction[]>([])
   const [isCooldown, setIsCooldown] = useState(false)
+  const timerIdsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
 
   useEffect(() => {
     function onReaction(payload: ReactionBroadcast) {
@@ -37,17 +38,23 @@ export function useReactions({
       setActiveReactions((prev) => [...prev, reaction])
 
       // Auto-remove after animation completes
-      setTimeout(() => {
+      const timerId = setTimeout(() => {
+        timerIdsRef.current.delete(timerId)
         setActiveReactions((prev) =>
           prev.filter((r) => r.id !== reaction.id),
         )
       }, REACTION_ANIMATION_DURATION_MS)
+      timerIdsRef.current.add(timerId)
     }
 
     socket.on("reaction", onReaction)
 
     return () => {
       socket.off("reaction", onReaction)
+      for (const id of timerIdsRef.current) {
+        clearTimeout(id)
+      }
+      timerIdsRef.current.clear()
     }
   }, [])
 

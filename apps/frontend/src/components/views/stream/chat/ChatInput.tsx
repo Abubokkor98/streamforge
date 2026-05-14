@@ -13,7 +13,7 @@ interface ChatInputProps {
 }
 
 function ChatInput({ onSend, disabled, slowModeRemaining }: ChatInputProps) {
-  const [, action, isPending] = useActionState(async (_: unknown, formData: FormData) => {
+  const [, action, isPending] = useActionState(async (_: null, formData: FormData) => {
     const text = formData.get("text") as string
     if (text?.trim()) {
       onSend(text.trim())

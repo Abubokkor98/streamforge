@@ -114,7 +114,13 @@ export function useChat({ roomKey, isHost }: UseChatOptions): UseChatReturn {
 
     socket.emit("send-message", { roomKey, text: trimmed }, (response) => {
       if (response.success && response.message) {
-        setMessages((prev) => [...prev, response.message!])
+        const confirmedMessage = response.message
+        setMessages((prev) => {
+          if (prev.some((msg) => msg.id === confirmedMessage.id)) {
+            return prev
+          }
+          return [...prev, confirmedMessage]
+        })
       } else {
         toast.error(response.error ?? "Failed to send message")
       }
