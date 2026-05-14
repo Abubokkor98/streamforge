@@ -4,7 +4,10 @@ import { useRooms } from "@/hooks/useRooms"
 import { RoomCard } from "@/components/views/dashboard/RoomCard"
 import { DashboardSkeleton } from "@/components/views/dashboard/DashboardSkeleton"
 import { CreateRoomDialog } from "@/components/views/dashboard/CreateRoomDialog"
+import { ErrorDisplay } from "@/components/shared/error-display"
 import { Button } from "@/components/ui/button"
+
+const STAGGER_DELAY_MS = 80
 
 /**
  * Handles its own loading/error states via useRooms hook.
@@ -19,17 +22,15 @@ function DashboardView() {
 
   if (error) {
     return (
-      <section className="flex flex-col items-center gap-4 py-20 text-center">
-        <h2 className="text-lg font-semibold text-destructive">
-          Failed to load rooms
-        </h2>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          {error?.message ?? "Something went wrong."}
-        </p>
-        <Button onClick={refetch} variant="outline">
-          Try again
-        </Button>
-      </section>
+      <ErrorDisplay
+        title="Failed to load rooms"
+        message={error?.message ?? "Something went wrong."}
+        action={
+          <Button onClick={refetch} variant="outline">
+            Try again
+          </Button>
+        }
+      />
     )
   }
 
@@ -59,8 +60,14 @@ function DashboardView() {
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {rooms.map((room) => (
-          <RoomCard key={room.id} room={room} onDeleted={refetch} />
+        {rooms.map((room, index) => (
+          <div
+            key={room.id}
+            className="animate-fade-in-up"
+            style={{ animationDelay: `${index * STAGGER_DELAY_MS}ms` }}
+          >
+            <RoomCard room={room} onDeleted={refetch} />
+          </div>
         ))}
       </div>
     </section>

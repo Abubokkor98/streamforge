@@ -7,3 +7,9 @@ export interface StreamSessionResponse {
   peakViewerCount: number;
   totalChatMessages: number;
 }
+
+export interface StreamSessionSummary extends StreamSessionResponse {
+  roomTitle: string;
+  roomKey: string;
+  hostName: string;
+}

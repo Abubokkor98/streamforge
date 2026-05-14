@@ -74,6 +74,7 @@ export interface ServerToClientEvents {
   'reaction': (payload: ReactionBroadcast) => void;
   'viewer-count-updated': (payload: { roomKey: string; count: number }) => void;
   'chat-history': (messages: ChatMessageResponse[]) => void;
+  'stream-ended': (payload: { roomKey: string }) => void;
   'error': (payload: { message: string }) => void;
 }
 

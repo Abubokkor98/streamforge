@@ -32,3 +32,48 @@ export async function endStream(req: Request, res: Response, next: NextFunction)
     next(error);
   }
 }
+
+export async function getStreamHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    if (!req.user) {
+      throw ApiError.unauthorized();
+    }
+
+    const roomKey = req.params.roomKey as string;
+    const sessions = await streamsService.getStreamHistory(roomKey, req.user.userId);
+
+    res.status(StatusCodes.OK).json({ status: 'success', data: sessions });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getStreamSummary(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    if (!req.user) {
+      throw ApiError.unauthorized();
+    }
+
+    const roomKey = req.params.roomKey as string;
+    const sessionId = Number(req.params.sessionId);
+    const summary = await streamsService.getStreamSummary(roomKey, sessionId, req.user.userId);
+
+    res.status(StatusCodes.OK).json({ status: 'success', data: summary });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getAllStreamHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    if (!req.user) {
+      throw ApiError.unauthorized();
+    }
+
+    const sessions = await streamsService.getAllStreamHistory(req.user.userId);
+
+    res.status(StatusCodes.OK).json({ status: 'success', data: sessions });
+  } catch (error) {
+    next(error);
+  }
+}

@@ -1,3 +1,4 @@
+import { ViewTransition } from "react"
 import { Manrope, JetBrains_Mono } from "next/font/google"
 
 import "./globals.css"
@@ -29,7 +30,9 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <QueryProvider>
-            {children}
+            <ViewTransition>
+              {children}
+            </ViewTransition>
           </QueryProvider>
           <Toaster />
         </ThemeProvider>

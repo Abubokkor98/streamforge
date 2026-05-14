@@ -46,7 +46,7 @@ function ChatPanel({ roomKey, isHost, guestChatEnabled }: ChatPanelProps) {
 
       {/* Message list */}
       <div
-        className="flex-1 overflow-y-auto scroll-smooth py-2"
+        className="chat-message-list flex-1 overflow-y-auto scroll-smooth py-2"
         role="log"
         aria-live="polite"
         aria-label="Chat messages"

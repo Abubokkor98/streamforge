@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useOptimistic } from "react"
+import { useState, useEffect, useOptimistic, startTransition } from "react"
 import { socket } from "@/lib/socket"
 import { toast } from "sonner"
 import type { ChatMessageResponse } from "@/lib/types/socket-events"
@@ -37,35 +37,41 @@ export function useChat({ roomKey, isHost }: UseChatOptions): UseChatReturn {
     socket.emit("join-room", roomKey)
 
     function onChatHistory(history: ChatMessageResponse[]) {
-      setMessages(history)
+      startTransition(() => setMessages(history))
     }
 
     function onNewMessage(message: ChatMessageResponse) {
-      setMessages((prev) => {
-        if (prev.some((msg) => msg.id === message.id)) {
-          return prev
-        }
-        return [...prev, message]
+      startTransition(() => {
+        setMessages((prev) => {
+          if (prev.some((msg) => msg.id === message.id)) {
+            return prev
+          }
+          return [...prev, message]
+        })
       })
     }
 
     function onMessageDeleted(payload: { messageId: number }) {
-      setMessages((prev) =>
-        prev.filter((msg) => msg.id !== payload.messageId),
-      )
+      startTransition(() => {
+        setMessages((prev) =>
+          prev.filter((msg) => msg.id !== payload.messageId),
+        )
+      })
     }
 
     function onMessagePinned(payload: {
       messageId: number
       isPinned: boolean
     }) {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === payload.messageId
-            ? { ...msg, isPinned: payload.isPinned }
-            : msg,
-        ),
-      )
+      startTransition(() => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === payload.messageId
+              ? { ...msg, isPinned: payload.isPinned }
+              : msg,
+          ),
+        )
+      })
     }
 
     function onSocketError(payload: { message: string }) {

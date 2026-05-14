@@ -19,6 +19,7 @@ function MicToggle() {
       size="icon"
       className="size-12 rounded-full transition-colors"
       aria-label={enabled ? "Mute microphone" : "Unmute microphone"}
+      aria-pressed={enabled}
     >
       <Icon className="size-5" weight={enabled ? "bold" : "fill"} />
     </Button>

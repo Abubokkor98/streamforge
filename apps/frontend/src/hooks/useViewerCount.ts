@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, startTransition } from "react"
 import { socket } from "@/lib/socket"
 
 interface UseViewerCountReturn {
@@ -16,7 +16,7 @@ export function useViewerCount(roomKey: string): UseViewerCountReturn {
       count: number
     }) {
       if (payload.roomKey === roomKey) {
-        setViewerCount(payload.count)
+        startTransition(() => setViewerCount(payload.count))
       }
     }
 

@@ -1,4 +1,4 @@
-import { SquaresFour, List } from "@phosphor-icons/react/dist/ssr"
+import { SquaresFour, List, ClockCounterClockwise } from "@phosphor-icons/react/dist/ssr"
 import { NavLink } from "@/components/shared/nav-link"
 
 interface NavItemConfig {
@@ -10,6 +10,7 @@ interface NavItemConfig {
 const NAV_ITEMS: NavItemConfig[] = [
   { label: "Dashboard", href: "/dashboard", icon: <SquaresFour className="size-4 shrink-0" aria-hidden="true" /> },
   { label: "My Rooms", href: "/dashboard/rooms", icon: <List className="size-4 shrink-0" aria-hidden="true" /> },
+  { label: "Stream History", href: "/dashboard/history", icon: <ClockCounterClockwise className="size-4 shrink-0" aria-hidden="true" /> },
 ]
 
 function Sidebar() {

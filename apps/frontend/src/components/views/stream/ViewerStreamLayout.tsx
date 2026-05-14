@@ -57,7 +57,7 @@ function ViewerStreamLayout({ room, guestChatEnabled }: ViewerStreamLayoutProps)
               <div className="flex size-16 animate-pulse items-center justify-center rounded-full bg-white/5">
                 <div className="size-8 rounded-full bg-white/10" />
               </div>
-              <p className="text-sm font-medium uppercase tracking-widest text-white/40">
+              <p className="text-sm font-medium uppercase tracking-widest text-white/70">
                 Waiting for host…
               </p>
             </div>

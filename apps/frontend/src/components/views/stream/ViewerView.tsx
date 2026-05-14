@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { LiveKitRoom } from "@livekit/components-react"
 import "@livekit/components-styles"
 import { useRoom } from "@/hooks/useRoom"
 import { useLivekitToken } from "@/hooks/useLivekitToken"
 import { useIsAuthenticated } from "@/lib/auth-store"
 import { useSocket } from "@/hooks/useSocket"
+import { socket } from "@/lib/socket"
+import { toast } from "sonner"
 import { ViewerStreamLayout } from "@/components/views/stream/ViewerStreamLayout"
 import { GuestNamePrompt } from "@/components/views/stream/GuestNamePrompt"
 import { WaitingForHost } from "@/components/views/stream/WaitingForHost"
@@ -28,6 +30,38 @@ function ViewerView({ roomKey }: ViewerViewProps) {
 
   // Socket connection — auth user or guest
   useSocket({ guestName: guestName ?? undefined })
+
+  // Instant stream-ended detection via Socket.IO (fallback: 15s polling above)
+  const [isStreamEnded, setIsStreamEnded] = useState(false)
+  const previousStatusRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    function onStreamEnded(payload: { roomKey: string }) {
+      if (payload.roomKey === roomKey) {
+        toast.info("Stream has ended")
+        setIsStreamEnded(true)
+      }
+    }
+
+    socket.on("stream-ended", onStreamEnded)
+    return () => {
+      socket.off("stream-ended", onStreamEnded)
+    }
+  }, [roomKey])
+
+  // Detect status transition via polling fallback (LIVE → ENDED)
+  const roomStatus = room?.status ?? null
+
+  useEffect(() => {
+    if (!roomStatus) return
+    if (isStreamEnded) return
+
+    if (previousStatusRef.current === "LIVE" && roomStatus === "ENDED") {
+      toast.info("Stream has ended")
+      setIsStreamEnded(true)
+    }
+    previousStatusRef.current = roomStatus
+  }, [roomStatus, isStreamEnded])
 
   // Token is fetched only when the viewer is ready (authenticated OR guest name provided)
   const isReadyToConnect = isAuthenticated || guestName !== null
@@ -55,8 +89,8 @@ function ViewerView({ roomKey }: ViewerViewProps) {
     return <HostViewError message="Room not found" />
   }
 
-  if (room.status !== "LIVE") {
-    return room.status === "ENDED"
+  if (room.status !== "LIVE" || isStreamEnded) {
+    return room.status === "ENDED" || isStreamEnded
       ? <StreamEndedOverlay roomTitle={room.title} />
       : <WaitingForHost roomTitle={room.title} hostName={room.hostName} />
   }
