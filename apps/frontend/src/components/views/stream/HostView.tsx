@@ -5,6 +5,7 @@ import "@livekit/components-styles"
 import { useRoom } from "@/hooks/useRoom"
 import { useLivekitToken } from "@/hooks/useLivekitToken"
 import { useHostStreamActions } from "@/hooks/useHostStream"
+import { useSocket } from "@/hooks/useSocket"
 import { HostBroadcastLayout } from "@/components/views/stream/HostBroadcastLayout"
 import { HostViewSkeleton } from "@/components/views/stream/HostViewSkeleton"
 import { HostViewError } from "@/components/views/stream/HostViewError"
@@ -21,6 +22,9 @@ function HostView({ roomKey }: HostViewProps) {
   const { tokenData, isLoading: isTokenLoading, error: tokenError } =
     useLivekitToken({ roomKey, isHost: true })
   const { phase, goLive, endStream } = useHostStreamActions(roomKey)
+
+  // Socket connection for host
+  useSocket()
 
   if (!LIVEKIT_URL) {
     return <HostViewError message="NEXT_PUBLIC_LIVEKIT_URL is not defined in environment variables." />
