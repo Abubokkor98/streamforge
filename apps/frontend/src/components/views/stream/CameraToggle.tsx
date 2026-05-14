@@ -19,6 +19,7 @@ function CameraToggle() {
       size="icon"
       className="size-12 rounded-full transition-colors"
       aria-label={enabled ? "Turn off camera" : "Turn on camera"}
+      aria-pressed={enabled}
     >
       <Icon className="size-5" weight={enabled ? "bold" : "fill"} />
     </Button>

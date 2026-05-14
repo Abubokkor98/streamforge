@@ -17,6 +17,7 @@ function ScreenShareToggle() {
       size="icon"
       className="size-12 rounded-full transition-colors"
       aria-label={enabled ? "Stop screen share" : "Share screen"}
+      aria-pressed={enabled}
     >
       <Monitor className="size-5" weight={enabled ? "fill" : "bold"} />
     </Button>

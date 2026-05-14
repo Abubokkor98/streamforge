@@ -20,6 +20,19 @@ import { logger } from '@/utils/logger';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 
+let ioInstance: TypedServer | null = null;
+
+/**
+ * Returns the initialized Socket.IO server instance.
+ * Must be called after initSocketServer() — throws if called before.
+ */
+export function getIO(): TypedServer {
+  if (!ioInstance) {
+    throw new Error('Socket.IO not initialized. Call initSocketServer() first.');
+  }
+  return ioInstance;
+}
+
 export function initSocketServer(httpServer: HttpServer): TypedServer {
   const io: TypedServer = new Server(httpServer, {
     cors: {
@@ -57,5 +70,6 @@ export function initSocketServer(httpServer: HttpServer): TypedServer {
     });
   });
 
+  ioInstance = io;
   return io;
 }

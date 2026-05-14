@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { socket } from "@/lib/socket"
 import { useAuthStore } from "@/lib/auth-store"
+import { toast } from "sonner"
 
 interface UseSocketOptions {
   guestName?: string
@@ -20,6 +21,9 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
   const [isConnected, setIsConnected] = useState(false)
   const [connectionError, setConnectionError] = useState<string | null>(null)
 
+  // Track whether we had a previous successful connection (for reconnect toasts)
+  const hadConnectionRef = useRef(false)
+
   useEffect(() => {
     if (accessToken) {
       socket.auth = { token: accessToken }
@@ -34,15 +38,35 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     function onConnect() {
       setIsConnected(true)
       setConnectionError(null)
+
+      if (hadConnectionRef.current) {
+        toast.success("Reconnected to server")
+      }
+      hadConnectionRef.current = true
     }
 
-    function onDisconnect() {
+    function onDisconnect(reason: string) {
       setIsConnected(false)
+
+      // Only show toast for unexpected disconnects (not intentional cleanup)
+      const isUnexpected =
+        reason === "transport close" ||
+        reason === "transport error" ||
+        reason === "ping timeout"
+
+      if (isUnexpected) {
+        toast.error("Connection lost. Reconnecting…")
+      }
     }
 
     function onConnectError(error: Error) {
       setConnectionError(error.message)
       setIsConnected(false)
+
+      // Only show toast once (not on every retry attempt)
+      if (!hadConnectionRef.current) {
+        toast.error("Unable to connect to chat server")
+      }
     }
 
     socket.on("connect", onConnect)

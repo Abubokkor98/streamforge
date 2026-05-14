@@ -1,8 +1,10 @@
 import { RoomStatus } from '@prisma/client';
 import { prisma } from '@/config/prisma';
 import { ApiError } from '@/utils/api-error';
-import { toStreamSessionResponse } from '@/helpers/streams.helpers';
-import type { StreamSessionResponse } from '@/modules/streams/streams.types';
+import { toStreamSessionResponse, toStreamSessionSummary } from '@/helpers/streams.helpers';
+import { getIO } from '@/socket/socket-server';
+import { logger } from '@/utils/logger';
+import type { StreamSessionResponse, StreamSessionSummary } from '@/modules/streams/streams.types';
 
 const MS_PER_SECOND = 1000;
 
@@ -83,5 +85,71 @@ export async function endStream(
     }),
   ]);
 
+  // Notify all connected viewers in the room instantly via Socket.IO
+  try {
+    getIO().to(roomKey).emit('stream-ended', { roomKey });
+  } catch (error) {
+    logger.error({ error, roomKey }, '[Streams] Failed to emit stream-ended event');
+  }
+
   return toStreamSessionResponse(updatedSession);
+}
+
+export async function getStreamHistory(
+  roomKey: string,
+  hostId: number,
+): Promise<StreamSessionResponse[]> {
+  const room = await getOwnedRoomOrThrow(roomKey, hostId);
+
+  const sessions = await prisma.streamSession.findMany({
+    where: { room_id: room.id },
+    orderBy: { started_at: 'desc' },
+  });
+
+  return sessions.map(toStreamSessionResponse);
+}
+
+export async function getStreamSummary(
+  roomKey: string,
+  sessionId: number,
+  hostId: number,
+): Promise<StreamSessionSummary> {
+  const room = await getOwnedRoomOrThrow(roomKey, hostId);
+
+  const session = await prisma.streamSession.findFirst({
+    where: {
+      id: sessionId,
+      room_id: room.id,
+    },
+    include: {
+      room: {
+        include: { host: { select: { name: true } } },
+      },
+    },
+  });
+
+  if (!session) {
+    throw ApiError.notFound('Stream session not found');
+  }
+
+  return toStreamSessionSummary(session);
+}
+
+export async function getAllStreamHistory(
+  hostId: number,
+): Promise<StreamSessionSummary[]> {
+  const sessions = await prisma.streamSession.findMany({
+    where: {
+      room: { host_id: hostId },
+      ended_at: { not: null },
+    },
+    include: {
+      room: {
+        include: { host: { select: { name: true } } },
+      },
+    },
+    orderBy: { started_at: 'desc' },
+  });
+
+  return sessions.map(toStreamSessionSummary);
 }
