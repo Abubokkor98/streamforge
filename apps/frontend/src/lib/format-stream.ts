@@ -4,6 +4,11 @@
 
 const SECONDS_PER_MINUTE = 60
 const SECONDS_PER_HOUR = 3600
+const INVALID_DATE_FALLBACK = "—"
+
+function isValidDate(date: Date): boolean {
+  return !isNaN(date.getTime())
+}
 
 export function formatDuration(seconds: number | null): string {
   if (seconds === null || seconds === 0) return "—"
@@ -21,7 +26,10 @@ export function formatDuration(seconds: number | null): string {
 }
 
 export function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("en-US", {
+  const date = new Date(dateString)
+  if (!isValidDate(date)) return INVALID_DATE_FALLBACK
+
+  return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -29,7 +37,10 @@ export function formatDate(dateString: string): string {
 }
 
 export function formatTime(dateString: string): string {
-  return new Date(dateString).toLocaleTimeString("en-US", {
+  const date = new Date(dateString)
+  if (!isValidDate(date)) return INVALID_DATE_FALLBACK
+
+  return date.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
@@ -37,7 +48,10 @@ export function formatTime(dateString: string): string {
 }
 
 export function formatFullDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("en-US", {
+  const date = new Date(dateString)
+  if (!isValidDate(date)) return INVALID_DATE_FALLBACK
+
+  return date.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -50,9 +64,12 @@ export function formatTimeRange(
   endedAt: string | null,
 ): string {
   const startTime = formatTime(startedAt)
+  if (startTime === INVALID_DATE_FALLBACK) return INVALID_DATE_FALLBACK
 
   if (!endedAt) return startTime
 
   const endTime = formatTime(endedAt)
+  if (endTime === INVALID_DATE_FALLBACK) return startTime
+
   return `${startTime} — ${endTime}`
 }

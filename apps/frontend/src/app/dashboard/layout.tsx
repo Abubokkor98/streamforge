@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <Navbar />
       <div className="flex flex-1">
         <Sidebar />
-        <main id="main-content" className="flex-1 overflow-y-auto p-4 pb-20 lg:p-6 lg:pb-6">
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto p-4 pb-20 lg:p-6 lg:pb-6">
           {children}
         </main>
       </div>

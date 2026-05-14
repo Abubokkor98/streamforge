@@ -37,17 +37,17 @@ function StreamHistoryView() {
         </p>
       </header>
 
-      <div className="space-y-3">
+      <ul className="space-y-3">
         {sessions.map((session, index) => (
-          <div
+          <li
             key={session.id}
             className="animate-fade-in-up"
             style={{ animationDelay: `${index * STAGGER_DELAY_MS}ms` }}
           >
             <SessionRow session={session} />
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   )
 }

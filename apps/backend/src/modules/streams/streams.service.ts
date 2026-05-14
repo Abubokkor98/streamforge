@@ -7,6 +7,7 @@ import { logger } from '@/utils/logger';
 import type { StreamSessionResponse, StreamSessionSummary } from '@/modules/streams/streams.types';
 
 const MS_PER_SECOND = 1000;
+const MAX_STREAM_SESSIONS = 50;
 
 async function getOwnedRoomOrThrow(roomKey: string, hostId: number) {
   const room = await prisma.room.findUnique({ where: { room_key: roomKey } });
@@ -104,6 +105,7 @@ export async function getStreamHistory(
   const sessions = await prisma.streamSession.findMany({
     where: { room_id: room.id },
     orderBy: { started_at: 'desc' },
+    take: MAX_STREAM_SESSIONS,
   });
 
   return sessions.map(toStreamSessionResponse);
@@ -149,6 +151,7 @@ export async function getAllStreamHistory(
       },
     },
     orderBy: { started_at: 'desc' },
+    take: MAX_STREAM_SESSIONS,
   });
 
   return sessions.map(toStreamSessionSummary);

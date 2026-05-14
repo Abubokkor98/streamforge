@@ -50,15 +50,18 @@ function ViewerView({ roomKey }: ViewerViewProps) {
   }, [roomKey])
 
   // Detect status transition via polling fallback (LIVE → ENDED)
-  useEffect(() => {
-    if (!room) return
+  const roomStatus = room?.status ?? null
 
-    if (previousStatusRef.current === "LIVE" && room.status === "ENDED") {
+  useEffect(() => {
+    if (!roomStatus) return
+    if (isStreamEnded) return
+
+    if (previousStatusRef.current === "LIVE" && roomStatus === "ENDED") {
       toast.info("Stream has ended")
       setIsStreamEnded(true)
     }
-    previousStatusRef.current = room.status
-  }, [room?.status])
+    previousStatusRef.current = roomStatus
+  }, [roomStatus, isStreamEnded])
 
   // Token is fetched only when the viewer is ready (authenticated OR guest name provided)
   const isReadyToConnect = isAuthenticated || guestName !== null
