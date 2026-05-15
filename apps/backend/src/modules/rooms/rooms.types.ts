@@ -27,3 +27,22 @@ export interface UpdateRoomInput {
   slowModeInterval?: number | null;
   guestChatEnabled?: boolean;
 }
+
+export interface LiveRoomResponse {
+  roomKey: string;
+  title: string;
+  description: string | null;
+  hostName: string;
+  viewerCount: number;
+  startedAt: string;
+}
+
+export interface RecentRoomResponse {
+  roomKey: string;
+  title: string;
+  hostName: string;
+  endedAt: string;
+  durationSeconds: number | null;
+  peakViewerCount: number;
+  totalChatMessages: number;
+}

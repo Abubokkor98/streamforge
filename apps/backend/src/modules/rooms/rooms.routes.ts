@@ -8,6 +8,8 @@ const router = Router();
 
 const ROOMS_ROUTE_PATHS = {
   root: '/',
+  live: '/live',
+  recent: '/recent',
   mine: '/mine',
   byKey: '/:roomKey',
 } as const;
@@ -18,6 +20,10 @@ router.post(
   validate(createRoomSchema),
   roomsController.createRoom,
 );
+
+// Public endpoints — must be before :roomKey wildcard
+router.get(ROOMS_ROUTE_PATHS.live, roomsController.getLiveRooms);
+router.get(ROOMS_ROUTE_PATHS.recent, roomsController.getRecentRooms);
 
 router.get(ROOMS_ROUTE_PATHS.mine, authenticate, roomsController.getMyRooms);
 
