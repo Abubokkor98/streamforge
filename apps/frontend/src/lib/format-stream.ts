@@ -59,6 +59,31 @@ export function formatFullDate(dateString: string): string {
   })
 }
 
+export function getStreamDuration(startedAt: string): string {
+  const diffMs = Date.now() - new Date(startedAt).getTime()
+  const minutes = Math.floor(diffMs / 60_000)
+
+  if (minutes < 1) return "Just started"
+  if (minutes < 60) return `${minutes}m`
+
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+  return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
+}
+
+export function getTimeAgo(endedAt: string): string {
+  const diffMs = Date.now() - new Date(endedAt).getTime()
+  const minutes = Math.floor(diffMs / 60_000)
+
+  if (minutes < 1) return "Just now"
+  if (minutes < 60) return `${minutes}m ago`
+
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+
+  return `${Math.floor(hours / 24)}d ago`
+}
+
 export function formatTimeRange(
   startedAt: string,
   endedAt: string | null,

@@ -81,3 +81,23 @@ export async function deleteRoom(req: Request, res: Response, next: NextFunction
     next(error);
   }
 }
+
+export async function getLiveRooms(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const rooms = await roomsService.getLiveRooms();
+
+    res.status(StatusCodes.OK).json({ status: 'success', data: rooms });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getRecentRooms(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const rooms = await roomsService.getRecentRooms();
+
+    res.status(StatusCodes.OK).json({ status: 'success', data: rooms });
+  } catch (error) {
+    next(error);
+  }
+}
