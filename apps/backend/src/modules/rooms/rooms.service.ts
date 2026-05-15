@@ -115,19 +115,21 @@ export async function getLiveRooms(): Promise<LiveRoomResponse[]> {
 
   const io = getIO();
 
-  return rooms.map((room) => {
-    const viewerCount = io.sockets.adapter.rooms.get(room.room_key)?.size ?? 0;
-    const activeSession = room.stream_sessions[0];
+  return rooms
+    .filter((room) => room.stream_sessions.length > 0)
+    .map((room) => {
+      const viewerCount = io.sockets.adapter.rooms.get(room.room_key)?.size ?? 0;
+      const activeSession = room.stream_sessions[0];
 
-    return {
-      roomKey: room.room_key,
-      title: room.title,
-      description: room.description,
-      hostName: room.host.name,
-      viewerCount,
-      startedAt: activeSession?.started_at.toISOString() ?? new Date().toISOString(),
-    };
-  });
+      return {
+        roomKey: room.room_key,
+        title: room.title,
+        description: room.description,
+        hostName: room.host.name,
+        viewerCount,
+        startedAt: activeSession.started_at.toISOString(),
+      };
+    });
 }
 
 export async function getRecentRooms(): Promise<RecentRoomResponse[]> {

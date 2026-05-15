@@ -29,7 +29,7 @@ async function HomeFooter() {
             Get Started
           </Link>
           <a
-            href="https://github.comhttps://github.com/Abubokkor98/streamforge"
+            href="https://github.com/Abubokkor98/streamforge"
             target="_blank"
             rel="noopener noreferrer"
             className="transition-colors hover:text-foreground"

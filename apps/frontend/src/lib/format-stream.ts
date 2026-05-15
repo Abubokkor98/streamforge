@@ -60,7 +60,10 @@ export function formatFullDate(dateString: string): string {
 }
 
 export function getStreamDuration(startedAt: string): string {
-  const diffMs = Date.now() - new Date(startedAt).getTime()
+  const started = new Date(startedAt)
+  if (!isValidDate(started)) return INVALID_DATE_FALLBACK
+
+  const diffMs = Date.now() - started.getTime()
   const minutes = Math.floor(diffMs / 60_000)
 
   if (minutes < 1) return "Just started"
@@ -72,7 +75,10 @@ export function getStreamDuration(startedAt: string): string {
 }
 
 export function getTimeAgo(endedAt: string): string {
-  const diffMs = Date.now() - new Date(endedAt).getTime()
+  const ended = new Date(endedAt)
+  if (!isValidDate(ended)) return INVALID_DATE_FALLBACK
+
+  const diffMs = Date.now() - ended.getTime()
   const minutes = Math.floor(diffMs / 60_000)
 
   if (minutes < 1) return "Just now"

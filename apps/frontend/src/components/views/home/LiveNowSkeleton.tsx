@@ -3,7 +3,7 @@ function LiveNowSkeleton() {
     <section className="px-6 py-16 md:px-8" aria-label="Loading live streams">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 h-7 w-40 animate-pulse rounded-md bg-muted" />
-        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true" role="list">
+        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
           {Array.from({ length: 3 }).map((_, index) => (
             <li
               key={index}
