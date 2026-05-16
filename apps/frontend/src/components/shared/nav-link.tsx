@@ -8,6 +8,7 @@ interface NavLinkProps {
   label: string
   icon: React.ReactNode
   variant?: "sidebar" | "mobile"
+  isCollapsed?: boolean
 }
 
 const SIDEBAR_STYLES = {
@@ -27,7 +28,7 @@ const MOBILE_STYLES = {
  * Client-only leaf component — reads pathname for active state.
  * Used by both Sidebar and MobileNav (server components).
  */
-function NavLink({ href, label, icon, variant = "sidebar" }: NavLinkProps) {
+function NavLink({ href, label, icon, variant = "sidebar", isCollapsed = false }: NavLinkProps) {
   const pathname = usePathname()
 
   const isActive =
@@ -35,15 +36,17 @@ function NavLink({ href, label, icon, variant = "sidebar" }: NavLinkProps) {
     (href !== "/dashboard" && (pathname.startsWith(href + "/") || pathname === href))
 
   const styles = variant === "mobile" ? MOBILE_STYLES : SIDEBAR_STYLES
+  const collapsed = variant === "sidebar" && isCollapsed
 
   return (
     <Link
       href={href}
-      className={`${styles.base} ${isActive ? styles.active : styles.inactive}`}
+      className={`${styles.base} ${isActive ? styles.active : styles.inactive} ${collapsed ? "justify-center px-0" : ""}`}
       aria-current={isActive ? "page" : undefined}
+      title={collapsed ? label : undefined}
     >
       {icon}
-      {label}
+      {!collapsed && <span className="truncate">{label}</span>}
     </Link>
   )
 }

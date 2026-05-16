@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { GameController } from "@phosphor-icons/react/dist/ssr"
+import Image from "next/image"
 import { HomeNavbarActions } from "@/components/views/home/HomeNavbarActions"
+import { MobileHomeNavbar } from "@/components/views/home/MobileHomeNavbar"
 
 function HomeNavbar() {
   return (
@@ -10,19 +11,23 @@ function HomeNavbar() {
     >
       <Link
         href="/"
-        className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-foreground transition-colors hover:text-primary"
+        className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-primary"
       >
-        <span
-          className="inline-flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"
-          aria-hidden="true"
-        >
-          <GameController size={18} weight="fill" />
-        </span>
+        <Image 
+          src="/logo.png" 
+          alt="StreamForge Logo" 
+          width={32} 
+          height={32} 
+          className="rounded-lg"
+        />
         StreamForge
       </Link>
 
       <div className="flex items-center gap-3">
-        <HomeNavbarActions />
+        <div className="hidden md:flex md:items-center md:gap-3">
+          <HomeNavbarActions />
+        </div>
+        <MobileHomeNavbar />
       </div>
     </nav>
   )

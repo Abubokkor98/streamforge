@@ -24,7 +24,7 @@ function EmptyLiveState() {
       </div>
 
       <Button variant="outline" size="sm" className="gap-2" asChild>
-        <Link href="/register">
+        <Link href="/dashboard">
           <Lightning size={14} weight="fill" />
           Start Your First Stream
         </Link>
