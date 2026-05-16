@@ -5,8 +5,11 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean
 }
 
+// Fallback to empty string in production to use Next.js rewrites (relative paths),
+// preventing cross-origin 3rd-party cookie blocking by Brave/Safari.
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:5000")
 
 export const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
