@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { LogoutButton } from "@/components/shared/logout-button"
 
 function Navbar() {
@@ -6,14 +7,15 @@ function Navbar() {
     <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-sidebar-border bg-sidebar px-4 lg:px-6">
       <Link
         href="/"
-        className="flex items-center gap-2 text-lg font-bold tracking-tight text-sidebar-foreground transition-colors hover:text-sidebar-primary"
+        className="flex items-center gap-2 text-lg font-bold tracking-tight text-sidebar-primary"
       >
-        <span
-          className="inline-flex size-7 items-center justify-center rounded-md bg-primary text-xs font-black text-primary-foreground"
-          aria-hidden="true"
-        >
-          SF
-        </span>
+        <Image 
+          src="/logo.png" 
+          alt="StreamForge Logo" 
+          width={28} 
+          height={28} 
+          className="rounded-md"
+        />
         StreamForge
       </Link>
 

@@ -10,7 +10,7 @@ import { toast } from "sonner"
 import { isAxiosError } from "axios"
 
 const LOGOUT_ENDPOINT = "/api/auth/logout"
-const LOGIN_ROUTE = "/login"
+const HOME_ROUTE = "/"
 
 /**
  * Client leaf — handles logout.
@@ -30,7 +30,7 @@ function LogoutButton() {
 
       logout()
       toast.success("Signed out successfully.")
-      router.push(LOGIN_ROUTE)
+      router.push(HOME_ROUTE)
     } catch (error) {
       const message = isAxiosError(error)
         ? error.response?.data?.message ?? "Failed to sign out. Please try again."

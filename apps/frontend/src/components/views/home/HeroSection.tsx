@@ -39,7 +39,7 @@ async function HeroSection() {
         aria-label="Primary actions"
       >
         <Button size="lg" className="h-12 gap-2 px-8 text-base shadow-lg shadow-primary/20" asChild>
-          <Link href="/register">
+          <Link href="/dashboard">
             <Lightning size={18} weight="fill" />
             Start Streaming
           </Link>
