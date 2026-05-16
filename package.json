@@ -15,7 +15,8 @@
     "start:backend": "node dist/apps/backend/main.js",
     "lint": "nx run-many -t lint",
     "ui:add": "pnpm dlx shadcn@latest add --cwd apps/frontend",
-    "clean": "nx reset && rimraf dist node_modules"
+    "clean": "nx reset && rimraf dist node_modules",
+    "postinstall": "prisma generate --schema=apps/backend/prisma/schema.prisma"
   },
   "dependencies": {
     "@livekit/components-react": "^2.9.21",
