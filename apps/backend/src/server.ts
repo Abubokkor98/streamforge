@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import type { IncomingMessage, ServerResponse } from 'http';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { env } from '@/config/env';
@@ -21,7 +22,14 @@ app.use(cors({
   origin: env.FRONTEND_URL,
   credentials: true,
 }));
-app.use(express.json());
+app.use(
+  express.json({
+    // Capture the exact raw byte stream for cryptographic webhook signature verification (e.g., LiveKit)
+    verify: (req: IncomingMessage & { rawBody?: Buffer }, _res: ServerResponse, buf: Buffer) => {
+      req.rawBody = buf;
+    },
+  })
+);
 app.use(cookieParser());
 app.use(globalLimiter);
 

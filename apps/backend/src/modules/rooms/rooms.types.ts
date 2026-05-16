@@ -10,6 +10,7 @@ export interface RoomResponse {
   slowModeInterval: number | null;
   guestChatEnabled: boolean;
   hostName: string;
+  hostAvatarUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   VideoTrack,
   AudioTrack,
@@ -14,9 +15,11 @@ import { ReactionOverlay } from "@/components/views/stream/reactions/ReactionOve
 import { useViewerCount } from "@/hooks/useViewerCount"
 import { useReactions } from "@/hooks/useReactions"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "@phosphor-icons/react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ArrowLeft, ChatText } from "@phosphor-icons/react"
 import Link from "next/link"
 import type { Room } from "@/lib/types/room"
+import { cn } from "@/lib/utils"
 
 interface ViewerStreamLayoutProps {
   room: Room
@@ -38,10 +41,12 @@ function ViewerStreamLayout({ room, guestChatEnabled }: ViewerStreamLayoutProps)
     (track) => track.source === Track.Source.Microphone,
   )
 
+  const [isChatOpen, setIsChatOpen] = useState(true)
+
   return (
-    <main className="relative flex h-dvh w-full overflow-hidden bg-black text-white">
+    <main className="relative flex h-dvh w-full overflow-hidden bg-background text-foreground">
       {/* Video area */}
-      <section className="relative flex flex-1 flex-col">
+      <section className="absolute inset-0 z-0 flex flex-col">
         <ReconnectionOverlay />
         <ReactionOverlay reactions={activeReactions} />
 
@@ -53,11 +58,16 @@ function ViewerStreamLayout({ room, guestChatEnabled }: ViewerStreamLayoutProps)
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-zinc-900/50">
-              <div className="flex size-16 animate-pulse items-center justify-center rounded-full bg-white/5">
-                <div className="size-8 rounded-full bg-white/10" />
-              </div>
-              <p className="text-sm font-medium uppercase tracking-widest text-white/70">
+            <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-muted/20">
+              <Avatar className="size-24 ring-2 ring-border/50 shadow-xl">
+                {room.hostAvatarUrl ? (
+                  <AvatarImage src={room.hostAvatarUrl} alt={room.hostName} className="object-cover" />
+                ) : null}
+                <AvatarFallback className="bg-background/50 text-3xl font-bold uppercase text-muted-foreground">
+                  {room.hostName.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <p className="text-sm font-medium uppercase tracking-widest text-foreground/70">
                 Waiting for host…
               </p>
             </div>
@@ -66,25 +76,25 @@ function ViewerStreamLayout({ room, guestChatEnabled }: ViewerStreamLayoutProps)
         </div>
 
         {/* Floating Header */}
-        <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between bg-linear-to-b from-black/60 to-transparent px-6 py-8">
+        <header className="absolute inset-x-0 top-0 z-20 flex items-center justify-between bg-linear-to-b from-background/80 to-transparent px-6 py-8">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
               asChild
-              className="rounded-full bg-white/5 backdrop-blur-md hover:bg-white/10"
+              className="rounded-full bg-background/20 backdrop-blur-md hover:bg-background/40 border border-border/20 text-foreground"
             >
               <Link href="/" aria-label="Leave stream">
                 <ArrowLeft className="size-5" />
               </Link>
             </Button>
             <div className="space-y-0.5">
-              <h1 className="text-base font-bold tracking-tight text-white drop-shadow-md">
+              <h1 className="text-base font-bold tracking-tight text-foreground drop-shadow-md">
                 {room.title}
               </h1>
               <div className="flex items-center gap-2">
                 <div className="size-1.5 animate-pulse rounded-full bg-primary" />
-                <p className="text-xs font-medium uppercase tracking-wider text-white/70">
+                <p className="text-xs font-medium uppercase tracking-wider text-foreground/70">
                   {room.hostName}
                 </p>
               </div>
@@ -96,19 +106,36 @@ function ViewerStreamLayout({ room, guestChatEnabled }: ViewerStreamLayoutProps)
         </header>
 
         {/* Floating Footer — Reactions */}
-        <footer className="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-6 bg-linear-to-t from-black/80 via-black/40 to-transparent pb-10 pt-20">
+        <footer className="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-6 bg-linear-to-t from-background/90 via-background/40 to-transparent pb-10 pt-20">
           <ReactionBar onReaction={sendReaction} disabled={isCooldown} />
         </footer>
       </section>
 
-      {/* Chat Panel — side panel on desktop */}
-      <aside className="hidden w-[360px] shrink-0 p-3 pl-0 lg:block">
-        <ChatPanel
-          roomKey={room.roomKey}
-          isHost={false}
-          guestChatEnabled={guestChatEnabled}
-        />
-      </aside>
+      {/* Toggle Button */}
+      <div 
+        className={cn(
+          "absolute right-4 top-1/2 -translate-y-1/2 z-30 transition-all duration-500",
+          isChatOpen ? "translate-x-16 opacity-0 pointer-events-none" : "translate-x-0 opacity-100"
+        )}
+      >
+        <Button
+          onClick={() => setIsChatOpen(true)}
+          size="icon"
+          className="size-12 rounded-full bg-background/60 backdrop-blur-2xl border border-border/50 shadow-xl hover:bg-accent/80 text-foreground/80 hover:text-foreground transition-all hover:scale-105"
+        >
+          <ChatText className="size-5" weight="fill" />
+        </Button>
+      </div>
+
+      {/* Chat Panel Overlay */}
+      <ChatPanel
+        roomKey={room.roomKey}
+        hostName={room.hostName}
+        isHost={false}
+        guestChatEnabled={guestChatEnabled}
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+      />
     </main>
   )
 }
