@@ -70,7 +70,7 @@ async function HomeFooter() {
               </a>
             </div>
             <div className="flex items-center gap-3">
-               <a href="https://abubokkor.vercel.app/" target="_blank" className="p-2 rounded-lg bg-secondary/50 hover:bg-primary/10 transition-colors text-muted-foreground hover:text-primary">
+               <a href="https://abubokkor.vercel.app/" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary/50 hover:bg-primary/10 transition-colors text-muted-foreground hover:text-primary" aria-label="Portfolio website">
                  <Globe size={18} weight="bold" />
                </a>
                <a href="https://linkedin.com/in/abubokkor" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-secondary/50 hover:bg-primary/10 transition-colors text-muted-foreground hover:text-primary" aria-label="LinkedIn profile">

@@ -44,6 +44,7 @@ function NavLink({ href, label, icon, variant = "sidebar", isCollapsed = false }
       className={`${styles.base} ${isActive ? styles.active : styles.inactive} ${collapsed ? "justify-center px-0" : ""}`}
       aria-current={isActive ? "page" : undefined}
       title={collapsed ? label : undefined}
+      aria-label={collapsed ? label : undefined}
     >
       {icon}
       {!collapsed && <span className="truncate">{label}</span>}

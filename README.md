@@ -157,23 +157,41 @@ Create environment files in the following locations:
 #### apps/backend/.env
 
 ```env
+# Database Connection
+DATABASE_URL=postgresql://user:password@localhost:5432/streamforge?schema=public
+
+# Server Configuration
 PORT=5000
-DATABASE_URL=your_postgresql_url
-JWT_SECRET=your_secret
-SMTP_USER=your_gmail
-SMTP_PASS=your_app_password
-LIVEKIT_URL=wss://your-host.livekit.cloud
+FRONTEND_URL=http://localhost:3000
+
+# Authentication
+JWT_SECRET=your_jwt_secret_key_here
+JWT_EXPIRES_IN=15m
+
+# Gmail SMTP Configuration (for Forgot Password OTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_specific_password
+SMTP_FROM="StreamForge <your_email@gmail.com>"
+
+# LiveKit Configuration (Media Server)
+LIVEKIT_URL=wss://your-project.livekit.cloud
 LIVEKIT_API_KEY=your_api_key
 LIVEKIT_API_SECRET=your_api_secret
-FRONTEND_URL=http://localhost:3000
 ```
 
 #### apps/frontend/.env.local
 
 ```env
+# Backend API URL (Internal)
 BACKEND_URL=http://localhost:5000
+
+# Socket.io Connection URL (Public)
 NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
-NEXT_PUBLIC_LIVEKIT_URL=wss://your-host.livekit.cloud
+
+# LiveKit Connection URL (Public)
+NEXT_PUBLIC_LIVEKIT_URL=wss://your-project.livekit.cloud
 ```
 
 ### Running the Project
