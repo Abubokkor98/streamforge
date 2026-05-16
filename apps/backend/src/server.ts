@@ -12,6 +12,7 @@ import { StatusCodes } from 'http-status-codes';
 const app = express();
 
 const SERVER_ROUTE_PATHS = {
+  root: '/',
   health: '/health',
   api: '/api',
 } as const;
@@ -33,10 +34,21 @@ app.use(
 app.use(cookieParser());
 app.use(globalLimiter);
 
+// Root / Welcome route
+app.get(SERVER_ROUTE_PATHS.root, (_req: Request, res: Response) => {
+  res.status(StatusCodes.OK).json({
+    status: STATUS_OK,
+    message: 'StreamForge API is running',
+    version: '1.0.0',
+    timestamp: new Date()
+  });
+});
+
 // Health check
 app.get(SERVER_ROUTE_PATHS.health, (_req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ status: STATUS_OK, timestamp: new Date() });
 });
+
 
 // Central API router — all module routes register here
 app.use(SERVER_ROUTE_PATHS.api, apiRouter);
