@@ -58,6 +58,7 @@ function ChatPanel({ roomKey, hostName, isHost, guestChatEnabled, isOpen, onClos
           variant="ghost" 
           size="icon-xs" 
           onClick={onClose} 
+          aria-label="Close chat"
           className="text-muted-foreground hover:text-foreground hover:bg-background/30 rounded-full transition-colors"
         >
           <X className="size-4" />

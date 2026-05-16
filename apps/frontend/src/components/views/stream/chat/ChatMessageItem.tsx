@@ -57,13 +57,13 @@ function ChatMessageItem({
 
         {/* Moderation Controls */}
         {isHost && !isPending && (
-          <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
             <Button
               variant="ghost"
               size="icon-xs"
               onClick={() => onPin(message.id, !message.isPinned)}
               className={cn(
-                "h-6 w-6 rounded-full transition-colors",
+                "h-6 w-6 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-primary focus:outline-none",
                 message.isPinned 
                   ? "bg-primary/20 text-primary hover:bg-primary/30" 
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -75,7 +75,7 @@ function ChatMessageItem({
               variant="ghost"
               size="icon-xs"
               onClick={() => onDelete(message.id)}
-              className="h-6 w-6 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+              className="h-6 w-6 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors focus-visible:ring-2 focus-visible:ring-destructive focus:outline-none"
             >
               <Trash className="size-3" />
             </Button>

@@ -117,10 +117,13 @@ function ViewerStreamLayout({ room, guestChatEnabled }: ViewerStreamLayoutProps)
           "absolute right-4 top-1/2 -translate-y-1/2 z-30 transition-all duration-500",
           isChatOpen ? "translate-x-16 opacity-0 pointer-events-none" : "translate-x-0 opacity-100"
         )}
+        aria-hidden={isChatOpen}
       >
         <Button
           onClick={() => setIsChatOpen(true)}
           size="icon"
+          aria-label="Open chat"
+          tabIndex={isChatOpen ? -1 : 0}
           className="size-12 rounded-full bg-background/60 backdrop-blur-2xl border border-border/50 shadow-xl hover:bg-accent/80 text-foreground/80 hover:text-foreground transition-all hover:scale-105"
         >
           <ChatText className="size-5" weight="fill" />

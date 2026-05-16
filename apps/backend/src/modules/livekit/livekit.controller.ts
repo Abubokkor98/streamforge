@@ -24,7 +24,7 @@ export async function getToken(req: Request, res: Response, next: NextFunction):
   }
 }
 
-export async function webhook(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function webhook(req: Request, res: Response): Promise<void> {
   try {
     const authHeader = req.header('Authorization');
     if (!authHeader) {

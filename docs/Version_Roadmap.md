@@ -34,7 +34,7 @@ The following features from the original MVP requirements have been successfully
 ### Real-Time Interactivity (Socket.io)
 - **Live Chat:** Real-time messaging, chat history fetching (last 50 messages), and a 300-character limit.
 - **Chat Moderation:** Host can delete and pin messages.
-- **Chat Rate Limiting & Slow Mode:** Configurable slow mode delays (10s, 30s, 60s) and guest chat toggling.
+- **Chat Rate Limiting & Slow Mode:** Configurable slow-mode delays (10s, 30s, 60s) and guest chat toggling.
 - **Reactions:** Emoji reaction bar with floating animations and cooldown rate limiting.
 - **Live Metrics:** Real-time viewer count updates across all participants.
 
