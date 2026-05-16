@@ -9,7 +9,7 @@ interface MobileNavItemConfig {
 
 const MOBILE_NAV_ITEMS: MobileNavItemConfig[] = [
   { label: "Dashboard", href: "/dashboard", icon: <SquaresFour className="size-5" aria-hidden="true" /> },
-  { label: "Rooms", href: "/dashboard/rooms", icon: <List className="size-5" aria-hidden="true" /> },
+  // { label: "Rooms", href: "/dashboard/rooms", icon: <List className="size-5" aria-hidden="true" /> },
   { label: "History", href: "/dashboard/history", icon: <ClockCounterClockwise className="size-5" aria-hidden="true" /> },
 ]
 
