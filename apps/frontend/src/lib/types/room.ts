@@ -14,6 +14,7 @@ interface Room {
   slowModeInterval: number | null
   guestChatEnabled: boolean
   hostName: string
+  hostAvatarUrl: string | null
   createdAt: string
   updatedAt: string
 }

@@ -8,6 +8,7 @@ const router = Router();
 
 const LIVEKIT_ROUTE_PATHS = {
   token: '/token',
+  webhook: '/webhook',
 } as const;
 
 // optionalAuthenticate: sets req.user if JWT present, allows guests through
@@ -17,5 +18,8 @@ router.post(
   validate(livekitTokenSchema),
   livekitController.getToken,
 );
+
+// webhook expects no standard auth, handled by WebhookReceiver inside controller
+router.post(LIVEKIT_ROUTE_PATHS.webhook, livekitController.webhook);
 
 export default router;

@@ -96,6 +96,48 @@ export async function endStream(
   return toStreamSessionResponse(updatedSession);
 }
 
+export async function forceEndStream(roomKey: string): Promise<void> {
+  const room = await prisma.room.findUnique({ where: { room_key: roomKey } });
+
+  if (!room || room.status !== RoomStatus.LIVE) {
+    return;
+  }
+
+  const activeSession = await prisma.streamSession.findFirst({
+    where: {
+      room_id: room.id,
+      ended_at: null,
+    },
+    orderBy: { started_at: 'desc' },
+  });
+
+  if (!activeSession) return;
+
+  const now = new Date();
+  const durationMs = now.getTime() - activeSession.started_at.getTime();
+  const durationSeconds = Math.floor(durationMs / MS_PER_SECOND);
+
+  await prisma.$transaction([
+    prisma.streamSession.update({
+      where: { id: activeSession.id },
+      data: {
+        ended_at: now,
+        duration_seconds: durationSeconds,
+      },
+    }),
+    prisma.room.update({
+      where: { room_key: roomKey },
+      data: { status: RoomStatus.ENDED },
+    }),
+  ]);
+
+  try {
+    getIO().to(roomKey).emit('stream-ended', { roomKey });
+  } catch (error) {
+    logger.error({ error, roomKey }, '[Streams] Failed to emit stream-ended event from webhook');
+  }
+}
+
 export async function getStreamHistory(
   roomKey: string,
   hostId: number,

@@ -16,7 +16,7 @@ const ROOM_KEY_LENGTH = 12;
 const RECENT_ROOMS_HOURS = 24;
 const MAX_RECENT_ROOMS = 12;
 
-const HOST_SELECT = { host: { select: { name: true } } } as const;
+const HOST_SELECT = { host: { select: { name: true, avatar_url: true } } } as const;
 
 async function getOwnedRoomOrThrow(roomKey: string, hostId: number) {
   const room = await prisma.room.findUnique({ where: { room_key: roomKey } });
