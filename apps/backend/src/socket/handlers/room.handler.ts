@@ -70,6 +70,8 @@ export function registerRoomHandlers(io: TypedServer, socket: TypedSocket): void
 
     // Determine if this user is the room host
     if (socket.data.userId) {
+      socket.data.isHost = false; // Reset to avoid stale state
+
       try {
         const room = await prisma.room.findUnique({
           where: { room_key: roomKey },
