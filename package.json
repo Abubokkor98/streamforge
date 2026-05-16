@@ -12,7 +12,7 @@
     "build:backend": "nx build backend",
     "start": "concurrently \"pnpm start:frontend\" \"pnpm start:backend\"",
     "start:frontend": "next start apps/frontend --port 3000",
-    "start:backend": "node dist/apps/backend/main.js",
+    "start:backend": "node apps/backend/dist/src/main.js",
     "lint": "nx run-many -t lint",
     "ui:add": "pnpm dlx shadcn@latest add --cwd apps/frontend",
     "clean": "nx reset && rimraf dist node_modules",
