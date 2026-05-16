@@ -7,8 +7,6 @@ import * as streamsService from '@/modules/streams/streams.service';
 import { env } from '@/config/env';
 import { logger } from '@/utils/logger';
 
-const GRACE_PERIOD_MS = 30 * 1000;
-const disconnectionTimeouts = new Map<string, NodeJS.Timeout>();
 const receiver = new WebhookReceiver(env.LIVEKIT_API_KEY, env.LIVEKIT_API_SECRET);
 
 export async function getToken(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -61,31 +59,13 @@ export async function webhook(req: Request, res: Response): Promise<void> {
 
     if (event.event === 'participant_left') {
       if (isHost) {
-        logger.info({ roomKey }, '[LiveKit Webhook] Host disconnected. Starting 30s grace period.');
-        
-        if (disconnectionTimeouts.has(roomKey)) {
-          clearTimeout(disconnectionTimeouts.get(roomKey));
-        }
-
-        const timeout = setTimeout(async () => {
-          logger.info({ roomKey }, '[LiveKit Webhook] Grace period expired. Ending stream.');
-          try {
-            await streamsService.forceEndStream(roomKey);
-          } catch (error) {
-            logger.error({ error, roomKey }, '[LiveKit Webhook] Failed to end stream after grace period');
-          }
-          disconnectionTimeouts.delete(roomKey);
-        }, GRACE_PERIOD_MS);
-
-        disconnectionTimeouts.set(roomKey, timeout);
+        logger.info({ roomKey }, '[LiveKit Webhook] Host disconnected from LiveKit.');
+        streamsService.scheduleStreamCleanup(roomKey);
       }
     } else if (event.event === 'participant_joined') {
       if (isHost) {
-        if (disconnectionTimeouts.has(roomKey)) {
-          logger.info({ roomKey }, '[LiveKit Webhook] Host reconnected. Clearing grace period timeout.');
-          clearTimeout(disconnectionTimeouts.get(roomKey));
-          disconnectionTimeouts.delete(roomKey);
-        }
+        logger.info({ roomKey }, '[LiveKit Webhook] Host reconnected to LiveKit.');
+        streamsService.cancelStreamCleanup(roomKey);
       }
     }
 

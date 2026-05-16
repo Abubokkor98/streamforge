@@ -8,6 +8,10 @@ import type { StreamSessionResponse, StreamSessionSummary } from '@/modules/stre
 
 const MS_PER_SECOND = 1000;
 const MAX_STREAM_SESSIONS = 50;
+const STREAM_CLEANUP_GRACE_PERIOD = 30 * 1000; // 30 seconds
+
+// Tracks pending auto-end timers for rooms where the host has disconnected.
+const cleanupTimeouts = new Map<string, NodeJS.Timeout>();
 
 async function getOwnedRoomOrThrow(roomKey: string, hostId: number) {
   const room = await prisma.room.findUnique({ where: { room_key: roomKey } });
@@ -50,6 +54,9 @@ export async function endStream(
   roomKey: string,
   hostId: number,
 ): Promise<StreamSessionResponse> {
+  // Cancel any pending auto-end timer since the host is ending manually
+  cancelStreamCleanup(roomKey);
+
   const room = await getOwnedRoomOrThrow(roomKey, hostId);
 
   if (room.status !== RoomStatus.LIVE) {
@@ -135,6 +142,44 @@ export async function forceEndStream(roomKey: string): Promise<void> {
     getIO().to(roomKey).emit('stream-ended', { roomKey });
   } catch (error) {
     logger.error({ error, roomKey }, '[Streams] Failed to emit stream-ended event from webhook');
+  }
+}
+
+/**
+ * Schedules a stream to be automatically ended after a grace period.
+ * Used as a fallback when a host disconnects via Socket.IO or LiveKit.
+ */
+export function scheduleStreamCleanup(roomKey: string): void {
+  if (cleanupTimeouts.has(roomKey)) {
+    return;
+  }
+
+  logger.info({ roomKey }, '[Streams] Host disconnected. Scheduling auto-end grace period.');
+
+  const timeout = setTimeout(async () => {
+    logger.info({ roomKey }, '[Streams] Grace period expired. Auto-ending stream.');
+    try {
+      await forceEndStream(roomKey);
+    } catch (error) {
+      logger.error({ error, roomKey }, '[Streams] Failed to auto-end stream');
+    } finally {
+      cleanupTimeouts.delete(roomKey);
+    }
+  }, STREAM_CLEANUP_GRACE_PERIOD);
+
+  cleanupTimeouts.set(roomKey, timeout);
+}
+
+/**
+ * Cancels a pending stream cleanup timer.
+ * Used when a host reconnects before the grace period expires.
+ */
+export function cancelStreamCleanup(roomKey: string): void {
+  const timeout = cleanupTimeouts.get(roomKey);
+  if (timeout) {
+    logger.info({ roomKey }, '[Streams] Host reconnected. Cancelling auto-end timer.');
+    clearTimeout(timeout);
+    cleanupTimeouts.delete(roomKey);
   }
 }
 
