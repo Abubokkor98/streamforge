@@ -12,6 +12,7 @@ import type {
 import { prisma } from '@/config/prisma';
 import { logger } from '@/utils/logger';
 import { getRecentMessages } from '@/modules/chat/chat.service';
+import * as streamsService from '@/modules/streams/streams.service';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
@@ -77,6 +78,8 @@ export function registerRoomHandlers(io: TypedServer, socket: TypedSocket): void
 
         if (room && room.host_id === socket.data.userId) {
           socket.data.isHost = true;
+          // Host reconnected — cancel any pending auto-end timer
+          streamsService.cancelStreamCleanup(roomKey);
         }
       } catch (error) {
         logger.error({ error, roomKey }, '[Room Handler] Failed to check host status');
@@ -116,12 +119,34 @@ export function registerRoomHandlers(io: TypedServer, socket: TypedSocket): void
 
   // Cleanup on disconnect — ensure viewer count is updated
   socket.on('disconnect', async () => {
-    const { currentRoom } = socket.data;
+    const { currentRoom, isHost } = socket.data;
 
     if (currentRoom) {
       // Socket is automatically removed from rooms on disconnect,
       // but we need to broadcast the updated count to remaining users.
       await broadcastViewerCount(io, currentRoom);
+
+      // If the host disconnected, start the grace period timer to auto-end the stream.
+      // We only do this if no other host sockets are currently connected for this room.
+      if (isHost) {
+        const roomSockets = io.sockets.adapter.rooms.get(currentRoom);
+        let otherHostExists = false;
+
+        if (roomSockets) {
+          for (const socketId of roomSockets) {
+            if (socketId === socket.id) continue;
+            const s = io.sockets.sockets.get(socketId);
+            if (s?.data.isHost) {
+              otherHostExists = true;
+              break;
+            }
+          }
+        }
+
+        if (!otherHostExists) {
+          streamsService.scheduleStreamCleanup(currentRoom);
+        }
+      }
     }
   });
 }
