@@ -11,6 +11,13 @@ import { StatusCodes } from 'http-status-codes';
 
 const app = express();
 
+// Trust proxy is required when hosting on Render/Vercel behind load balancers.
+// This ensures secure cookies and rate limiting work correctly because the load balancer terminates HTTPS.
+// References:
+// - Express behind proxies: https://expressjs.com/en/guide/behind-proxies.html
+// - MDN SameSite Cookies: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#samesitesamesite-value
+app.set('trust proxy', 1);
+
 const SERVER_ROUTE_PATHS = {
   root: '/',
   health: '/health',
