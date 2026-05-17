@@ -23,7 +23,6 @@ interface RegisterResponse {
     name: string
     email: string
   }
-  accessToken: string
 }
 
 const INITIAL_STATE: RegisterState = { error: null, fieldErrors: {} }

@@ -9,6 +9,7 @@ import { passwordResetEmailHtml } from '@/templates/email.template';
 import { buildAuthResponse } from '@/helpers/auth.helpers';
 import type {
   AuthResponse,
+  RegisterResponse,
   MessageResponse,
   ResetTokenResponse,
   RegisterServiceInput,
@@ -54,7 +55,7 @@ async function createRefreshTokenForUser(userId: number): Promise<string> {
   return refreshToken;
 }
 
-export async function register(input: RegisterServiceInput): Promise<AuthResponse> {
+export async function register(input: RegisterServiceInput): Promise<RegisterResponse> {
   const existingUser = await prisma.user.findUnique({
     where: { email: input.email },
   });
@@ -73,9 +74,13 @@ export async function register(input: RegisterServiceInput): Promise<AuthRespons
     },
   });
 
-  const refreshToken = await createRefreshTokenForUser(user.id);
-
-  return buildAuthResponse(user, refreshToken);
+  return {
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+  };
 }
 
 export async function login(input: LoginServiceInput): Promise<AuthResponse> {

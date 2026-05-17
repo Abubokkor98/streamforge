@@ -18,7 +18,8 @@ export function getErrorMessage(
   if (isAxiosError<ApiErrorResponse>(error)) {
     // Tier 1: Server responded with a non-2xx status code
     if (error.response) {
-      return error.response.data?.message ?? fallbackMessage
+      const serverMessage = error.response.data?.message?.trim()
+      return serverMessage ? serverMessage : fallbackMessage
     }
     
     // Tier 2: Request was made but no response was received (e.g. server offline, network timeout)
