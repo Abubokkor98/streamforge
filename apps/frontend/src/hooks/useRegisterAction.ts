@@ -3,9 +3,9 @@
 import { useActionState } from "react"
 import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/lib/api-client"
-import { useAuthStore } from "@/lib/auth-store"
 import { validatePassword, validatePasswordMatch } from "@/lib/validation"
 import { toast } from "sonner"
+import { getErrorMessage } from "@/lib/errors"
 
 interface RegisterState {
   error: string | null
@@ -27,7 +27,7 @@ interface RegisterResponse {
 }
 
 const INITIAL_STATE: RegisterState = { error: null, fieldErrors: {} }
-const DASHBOARD_ROUTE = "/dashboard"
+const LOGIN_ROUTE = "/login"
 
 function validateRegistration(formData: FormData): RegisterState | null {
   const name = formData.get("name") as string
@@ -55,7 +55,6 @@ function validateRegistration(formData: FormData): RegisterState | null {
 
 export function useRegisterAction() {
   const router = useRouter()
-  const { setUser, setToken } = useAuthStore()
 
   async function registerAction(
     _prevState: RegisterState,
@@ -72,20 +71,17 @@ export function useRegisterAction() {
     const confirmPassword = formData.get("confirmPassword") as string
 
     try {
-      const response = await axiosInstance.post<{
+      await axiosInstance.post<{
         status: string
         data: RegisterResponse
       }>("/api/auth/register", { name, email, password, confirmPassword })
 
-      setToken(response.data.data.accessToken)
-      setUser(response.data.data.user)
-      toast.success("Account created successfully!")
-      router.push(DASHBOARD_ROUTE)
+      toast.success("Account created successfully! Please sign in.")
+      router.push(LOGIN_ROUTE)
 
       return INITIAL_STATE
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Registration failed."
+      const message = getErrorMessage(error, "Registration failed.")
 
       if (message.toLowerCase().includes("already")) {
         return { error: null, fieldErrors: { email: message } }
@@ -100,3 +96,4 @@ export function useRegisterAction() {
 
   return { state, action }
 }
+

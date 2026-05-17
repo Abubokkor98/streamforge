@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/lib/api-client"
 import { useAuthStore } from "@/lib/auth-store"
 import { toast } from "sonner"
+import { getErrorMessage } from "@/lib/errors"
 
 interface LoginState {
   error: string | null
@@ -50,8 +51,7 @@ export function useLoginAction() {
 
       return { error: null }
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Login failed. Try again."
+      const message = getErrorMessage(error, "Login failed. Try again.")
       toast.error(message)
       return { error: message }
     }

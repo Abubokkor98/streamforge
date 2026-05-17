@@ -22,8 +22,7 @@ export async function register(
     logger.info({ email }, '[Auth] Registering user');
     const { refreshToken, accessToken, ...userData } = await authService.register({ name, email, password });
 
-    logger.info({ email }, '[Auth] User registered. Cookies set');
-    setAuthCookies(res, accessToken, refreshToken);
+    logger.info({ email }, '[Auth] User registered successfully');
     res.status(StatusCodes.CREATED).json({ status: 'success', data: { user: userData.user, accessToken } });
   } catch (error) {
     logger.error({ err: error, email: (req.body as RegisterInput).email }, '[Auth] Registration failed');

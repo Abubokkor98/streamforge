@@ -6,6 +6,7 @@ import { axiosInstance } from "@/lib/api-client"
 import { toast } from "sonner"
 import { validatePassword, validatePasswordMatch } from "@/lib/validation"
 import { safeSessionStorage } from "@/lib/safe-storage"
+import { getErrorMessage } from "@/lib/errors"
 
 interface ResetPasswordState {
   error: string | null
@@ -75,8 +76,7 @@ export function useResetPasswordAction() {
 
       return INITIAL_STATE
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Reset failed."
+      const message = getErrorMessage(error, "Reset failed.")
       toast.error(message)
       return { error: message, fieldErrors: {} }
     }
