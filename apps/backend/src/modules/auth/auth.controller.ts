@@ -20,11 +20,10 @@ export async function register(
   try {
     const { name, email, password } = req.body as RegisterInput;
     logger.info({ email }, '[Auth] Registering user');
-    const { refreshToken, accessToken, ...userData } = await authService.register({ name, email, password });
+    const { user } = await authService.register({ name, email, password });
 
-    logger.info({ email }, '[Auth] User registered. Cookies set');
-    setAuthCookies(res, accessToken, refreshToken);
-    res.status(StatusCodes.CREATED).json({ status: 'success', data: { user: userData.user, accessToken } });
+    logger.info({ email }, '[Auth] User registered successfully');
+    res.status(StatusCodes.CREATED).json({ status: 'success', data: { user } });
   } catch (error) {
     logger.error({ err: error, email: (req.body as RegisterInput).email }, '[Auth] Registration failed');
     next(error);

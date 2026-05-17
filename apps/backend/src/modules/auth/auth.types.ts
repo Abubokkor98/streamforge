@@ -15,6 +15,10 @@ export interface AuthResponse {
   refreshToken: string;
 }
 
+export interface RegisterResponse {
+  user: UserProfile;
+}
+
 export interface MessageResponse {
   message: string;
 }

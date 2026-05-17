@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/lib/api-client"
 import { safeSessionStorage } from "@/lib/safe-storage"
 import { toast } from "sonner"
+import { getErrorMessage } from "@/lib/errors"
 
 interface ForgotPasswordState {
   error: string | null
@@ -36,8 +37,7 @@ export function useForgotPasswordAction() {
 
       return { error: null, success: true }
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Something went wrong."
+      const message = getErrorMessage(error, "Something went wrong.")
       toast.error(message)
       return INITIAL_STATE
     }

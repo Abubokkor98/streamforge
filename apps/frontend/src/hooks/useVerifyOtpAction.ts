@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { axiosInstance } from "@/lib/api-client"
 import { safeSessionStorage } from "@/lib/safe-storage"
 import { toast } from "sonner"
+import { getErrorMessage } from "@/lib/errors"
 
 interface VerifyOtpState {
   error: string | null
@@ -60,8 +61,7 @@ export function useVerifyOtpAction() {
 
       return { error: null }
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Invalid OTP."
+      const message = getErrorMessage(error, "Invalid OTP.")
       toast.error(message)
       return INITIAL_STATE
     }
